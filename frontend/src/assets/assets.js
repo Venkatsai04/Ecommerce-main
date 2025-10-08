@@ -54,7 +54,6 @@ import p_img50 from './p_img50.png'
 import p_img51 from './p_img51.png'
 import p_img52 from './p_img52.png'
 
-
 import logo from './sahara.png'
 import hero_img from './hero_img.png'
 import cart_icon from './cart_icon.png'

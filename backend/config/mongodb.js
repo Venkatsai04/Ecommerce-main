@@ -7,7 +7,7 @@ const connectDB = async () => {
     console.log("MongoDB connected");
   });
 
-  await mongoose.connect(`${process.env.MONGODB_URI}/trendify`);
+  await mongoose.connect(`${process.env.MONGODB_URI}/saharaDB`);
 };
 
 export default connectDB;
