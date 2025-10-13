@@ -1,11 +1,12 @@
-import multer from "multer"; // ✅ import from node_modules, not './multer'
+import multer from "multer";
+import path from "path";
 
 const storage = multer.diskStorage({
-  destination: (req, file, callback) => {
-    callback(null, "uploads/"); // You can change the upload folder if needed
+  destination: function (req, file, cb) {
+    cb(null, "uploads"); // Make sure this folder exists
   },
-  filename: (req, file, callback) => {
-    callback(null, file.originalname); // Keep original file name
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
   },
 });
 

@@ -25,7 +25,7 @@ const Add = ({ token }) => {
 
       image1 && formData.append("image1", image1);
       image2 && formData.append("image2", image2);
-      image3 && formData.append("image3", image3);
+      image3 && formData.append("image3", image3); 
       image4 && formData.append("image4", image4);
 
       formData.append("name", name);
