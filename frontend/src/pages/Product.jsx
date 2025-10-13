@@ -41,6 +41,7 @@ const Product = () => {
   }, [productId]);
 
   // Add a review
+  // Add a review
   const handleAddReview = async () => {
     if (!user) return alert('Please login to add a review.');
     if (!newReview) return alert('Please write a review.');
@@ -50,18 +51,18 @@ const Product = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`, // if backend uses auth
+          Authorization: `Bearer ${localStorage.getItem('token')}`, // your backend auth
         },
         body: JSON.stringify({
-          userId: user._id,           // dynamically set userId from AuthContext
-          description: newReview,     // backend expects 'description'
-          rating,                     // rating
+          description: newReview, // backend expects this field
+          rating,                 // rating
         }),
       });
 
       const data = await res.json();
 
       if (res.ok) {
+        // Add the new review to the state
         setReviews((prev) => [...prev, data.review]);
         setNewReview('');
         setRating(5);
@@ -70,9 +71,10 @@ const Product = () => {
       }
     } catch (err) {
       console.error(err);
-      alert('Failed to add review. See console for details.');
+      alert('Failed to add review. Check console for details.');
     }
   };
+
 
 
   if (!productData) return <div className='opacity-0'></div>;
