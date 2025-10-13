@@ -25,6 +25,13 @@ const OurPolicy = () => {
                 We support via email, phone, or chat.
             </p>
         </div>
+        <div>
+            <img src={assets.eco} className='w-12 m-auto mb-3' alt="Exchange" />
+            <p className='mb-2 font-semibold'>Eco_friendly</p>
+            <p className='text-gray-400'>
+                We contibute for better tommorow 
+            </p>
+        </div>
     </div>
   )
 }
