@@ -153,12 +153,7 @@ const NavBar = () => {
                 >
                   Orders
                 </NavLink>
-                <p
-                  onClick={handleLogout}
-                  className="px-6 py-3 transition hover:bg-gray-50 cursor-pointer"
-                >
-                  Logout
-                </p>
+               
               </>
             )}
           </div>

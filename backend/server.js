@@ -6,6 +6,7 @@ import connectCloudinary from "./config/cloudinary.js";
 import userRouter from "./routes/userRoute.js";
 import productRouter from "./routes/productRoute.js";
 import Product from "./models/productModel.js"; // adjust path if needed
+import reviewRoutes from "./routes/reviewRoutes.js";
 
 
 // INFO: Create express app
@@ -21,6 +22,7 @@ app.use(cors());
 // INFO: API endpoints
 app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);
+app.use("/api/reviews", reviewRoutes);
 
 // INFO: Default route
 app.get("/", (req, res) => {
