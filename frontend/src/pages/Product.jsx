@@ -40,40 +40,43 @@ const Product = () => {
     fetchReviews();
   }, [productId]);
 
-  // Add a review
-  // Add a review
-  const handleAddReview = async () => {
-    if (!user) return alert('Please login to add a review.');
-    if (!newReview) return alert('Please write a review.');
+  //ADD
+const handleAddReview = async () => {
+  if (!user) return alert('Please login to add a review.');
+  if (!newReview) return alert('Please write a review.');
 
-    try {
-      const res = await fetch(`http://localhost:4000/api/reviews/${productId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`, // your backend auth
-        },
-        body: JSON.stringify({
-          description: newReview, // backend expects this field
-          rating,                 // rating
-        }),
-      });
+  console.log("Sending review", {
+    userId: user._id,
+    description: newReview,
+    rating
+  });
 
-      const data = await res.json();
+  try {
+    const res = await fetch(`http://localhost:4000/api/reviews/${productId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: user._id,       // must exist
+        description: newReview, // required by backend
+        rating
+      }),
+    });
 
-      if (res.ok) {
-        // Add the new review to the state
-        setReviews((prev) => [...prev, data.review]);
-        setNewReview('');
-        setRating(5);
-      } else {
-        alert(data.message || 'Failed to add review.');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Failed to add review. Check console for details.');
+    const data = await res.json();
+    if (res.ok) {
+      setReviews((prev) => [...prev, data.review]);
+      setNewReview('');
+      setRating(5);
+    } else {
+      alert(data.message || 'Failed to add review.');
     }
-  };
+  } catch (err) {
+    console.error(err);
+    alert('Failed to add review. Check console.');
+  }
+};
+
+
 
 
 
