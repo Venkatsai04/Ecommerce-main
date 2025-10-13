@@ -36,8 +36,8 @@ const Cart = () => {
         {cartData.map((item, index) => {
           const productData = products.find((product) => product._id === item._id);
 
-          // ✅ Skip rendering if product not found yet
-          if (!productData) return null;
+         
+          if (!productData) return <>Your cart is empty ☹️</>;
 
           return (
             <div
@@ -86,6 +86,7 @@ const Cart = () => {
               />
             </div>
           );
+
         })}
       </div>
 

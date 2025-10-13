@@ -38,6 +38,7 @@ const Login = () => {
 
       // Save JWT Token
       localStorage.setItem("token", data.token);
+      localStorage.setItem("user", true);
 
       alert(`${currentState} successful!`);
       window.location.href = "/"; // redirect to homepage or dashboard

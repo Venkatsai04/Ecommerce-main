@@ -1,11 +1,28 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { assets } from '../assets/assets';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { ShopContext } from '../context/ShopContext';
 
 const NavBar = () => {
   const [visible, setVisible] = useState(false);
+  const [user, setUser] = useState(null); // logged-in user
   const { setShowSearch, getCartCount } = useContext(ShopContext);
+  const navigate = useNavigate();
+
+  // Check if user is logged in
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    setUser(null);
+    navigate('/login');
+  };
 
   return (
     <nav className="flex items-center justify-between py-5 font-medium relative mt-">
@@ -23,13 +40,15 @@ const NavBar = () => {
               key={i}
               to={path}
               className={({ isActive }) =>
-                `flex flex-col items-center gap-1 transition ${
-                  isActive ? 'text-black font-semibold' : 'hover:text-gray-900'
+                `flex flex-col items-center gap-1 transition ${isActive ? 'text-black font-semibold' : 'hover:text-gray-900'
                 }`
               }
             >
               <p>{names[i]}</p>
-              <hr className={`h-[1.5px] w-2/4 bg-gray-700 border-none transition ${path === window.location.pathname ? 'block' : 'hidden'}`} />
+              <hr
+                className={`h-[1.5px] w-2/4 bg-gray-700 border-none transition ${path === window.location.pathname ? 'block' : 'hidden'
+                  }`}
+              />
             </NavLink>
           );
         })}
@@ -44,21 +63,22 @@ const NavBar = () => {
           alt="Search Products"
         />
 
-        {/* Profile Dropdown */}
-        <div className="relative group">
-          <Link to="/login">
-            <img src={assets.profile_icon} className="w-5 cursor-pointer" alt="Profile" />
-          </Link>
-          <div className="absolute right-0 mt-2 hidden group-hover:block">
-            <div className="bg-white rounded-xl shadow-md border border-gray-100 py-2 w-40 text-gray-600">
-              {['Profile', 'Orders', 'Logout'].map((item, i) => (
-                <p key={i} className="px-5 py-2 text-sm hover:bg-gray-50 hover:text-black cursor-pointer">
-                  {item}
-                </p>
-              ))}
-            </div>
-          </div>
+        {/* Profile Icon */}
+        <div>
+          <img
+            onClick={() => {
+              if (user) {
+                navigate('/profile'); // go straight to profile if logged in
+              } else {
+                navigate('/login'); // go to login/signup if not logged in
+              }
+            }}
+            src={assets.profile_icon}
+            className="w-5 cursor-pointer"
+            alt="Profile"
+          />
         </div>
+
 
         {/* Cart */}
         <Link to="/cart" className="relative">
@@ -79,17 +99,15 @@ const NavBar = () => {
 
       {/* Mobile Menu Overlay */}
       <div
-        className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity ${
-          visible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
+        className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity ${visible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          }`}
         onClick={() => setVisible(false)}
       ></div>
 
       {/* Mobile Sidebar */}
       <div
-        className={`fixed top-0 right-0 h-full w-4/5 bg-white z-50 shadow-xl transform transition-transform duration-300 ${
-          visible ? 'translate-x-0' : 'translate-x-full'
-        }`}
+        className={`fixed top-0 right-0 h-full w-4/5 bg-white z-50 shadow-xl transform transition-transform duration-300 ${visible ? 'translate-x-0' : 'translate-x-full'
+          }`}
       >
         <div className="flex flex-col h-full">
           <div
@@ -112,14 +130,37 @@ const NavBar = () => {
                 to={item.path}
                 onClick={() => setVisible(false)}
                 className={({ isActive }) =>
-                  `px-6 py-3 transition hover:bg-gray-50 ${
-                    isActive ? 'bg-gray-100 font-semibold' : ''
+                  `px-6 py-3 transition hover:bg-gray-50 ${isActive ? 'bg-gray-100 font-semibold' : ''
                   }`
                 }
               >
                 {item.name}
               </NavLink>
             ))}
+            {user && (
+              <>
+                <NavLink
+                  to="/profile"
+                  onClick={() => setVisible(false)}
+                  className="px-6 py-3 transition hover:bg-gray-50"
+                >
+                  Profile
+                </NavLink>
+                <NavLink
+                  to="/orders"
+                  onClick={() => setVisible(false)}
+                  className="px-6 py-3 transition hover:bg-gray-50"
+                >
+                  Orders
+                </NavLink>
+                <p
+                  onClick={handleLogout}
+                  className="px-6 py-3 transition hover:bg-gray-50 cursor-pointer"
+                >
+                  Logout
+                </p>
+              </>
+            )}
           </div>
         </div>
       </div>

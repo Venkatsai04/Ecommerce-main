@@ -17,6 +17,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import PrivacyPolicy from './pages/Policy'
 import ScrollToTop from './components/ScrollToTop'
+import Profile from './pages/Profile'
 
 const App = () => {
   return (
@@ -37,6 +38,7 @@ const App = () => {
         <Route path='/place-order' element={<PlaceOrder />} />
         <Route path='/orders' element={<Orders />} />
         <Route path='/privacy-policy' element={<PrivacyPolicy />} />
+        <Route path='/Profile' element={<Profile/>} />
       </Routes>
       <Footer />
     </div>
