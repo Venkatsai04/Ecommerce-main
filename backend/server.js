@@ -25,6 +25,24 @@ app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
+
+//Test node
+app.get("/api/products/all", async (req, res) => {
+  try {
+    const products = await Product.find(); // fetch all products from DB
+    res.status(200).json({
+      success: true,
+      data: products
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
+  }
+});
+
 // INFO: Start server
 app.listen(port, () =>
   console.log(`Server is running on at http://localhost:${port}`)
