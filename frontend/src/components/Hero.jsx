@@ -1,5 +1,6 @@
 import React from "react";
 import { assets } from "../assets/assets";
+import { Link } from "react-router-dom";
 
 const Hero = () => {
   return (
@@ -35,10 +36,12 @@ const Hero = () => {
             </p>
 
             {/* Attractive Button */}
-            <button className="relative inline-flex items-center justify-center px-8 py-3 mt-6 text-sm font-semibold text-white transition-all duration-300 rounded-full shadow-lg bg-gradient-to-r from-blue-400 via-pink-400 to-sky-500 hover:scale-105">
-              <span className="relative z-10">✨ Shop Now</span>
-              <div className="absolute inset-0 transition-all duration-300 rounded-full opacity-0 bg-gradient-to-r from-orange-400 via-yellow-400 to-yellow-500 blur-xl hover:opacity-40"></div>
-            </button>
+            <Link to="/collection">
+              <button className="relative inline-flex items-center justify-center px-8 py-3 mt-6 text-sm font-semibold text-white transition-all duration-300 rounded-full shadow-lg bg-gradient-to-r from-blue-400 via-pink-400 to-sky-500 hover:scale-105">
+                <span className="relative z-10">✨ Shop Now</span>
+                <div className="absolute inset-0 transition-all duration-300 rounded-full opacity-0 bg-gradient-to-r from-orange-400 via-yellow-400 to-yellow-500 blur-xl hover:opacity-40"></div>
+              </button>
+            </Link>
           </div>
 
           {/* Review Cards */}

@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import Title from "./Title";
 import ProductItem from "./ProductItem";
+import { Link } from "react-router-dom"
 
 const BestSeller = () => {
   const { products } = useContext(ShopContext);
@@ -38,9 +39,11 @@ const BestSeller = () => {
       </div>
 
       <div className="flex justify-center mt-12">
-        <button className="bg-gradient-to-r from-orange-500 to-yellow-400 text-white px-8 py-3 rounded-full text-sm md:text-base font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300">
-          View All Products
-        </button>
+        <Link to="/collection">
+          <button className="bg-gradient-to-r from-orange-500 to-yellow-400 text-white px-8 py-3 rounded-full text-sm md:text-base font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300">
+            View All Products
+          </button>
+        </Link>
       </div>
     </section>
   );
