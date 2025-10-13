@@ -25,12 +25,17 @@ const loginUser = async (req, res) => {
 
     if (isPasswordCorrect) {
       const token = createToken(user._id);
-      res.status(200).json({ success: true, token });
-    } else {
-      res
-        .status(400)
-        .json({ success: false, message: "Invalid email or password" });
+      res.status(200).json({
+        success: true,
+        token,
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+        },
+      });
     }
+
   } catch (error) {
     console.log("Error while logging in user: ", error);
     res.status(500).json({ success: false, message: error.message });
@@ -77,9 +82,16 @@ const registerUser = async (req, res) => {
 
     // INFO: Create token
     const token = createToken(user._id);
+    res.status(200).json({
+      success: true,
+      token,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+      },
+    });
 
-    // INFO: Return success response
-    res.status(200).json({ success: true, token });
   } catch (error) {
     console.log("Error while registering user: ", error);
     res.status(500).json({ success: false, message: error.message });

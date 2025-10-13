@@ -8,25 +8,13 @@ export const AuthProvider = ({ children }) => {
     JSON.parse(localStorage.getItem("user")) || null
   );
 
-  useEffect(() => {
-    if (token && !user) {
-      // Fetch user from backend using token, optional
-      // Example:
-      // fetch("/api/auth/me", { headers: { Authorization: `Bearer ${token}` }})
-      //   .then(res => res.json())
-      //   .then(data => setUser(data.user));
-
-      // For now, just make sure user exists in localStorage after login
-      const storedUser = JSON.parse(localStorage.getItem("user"));
-      if (storedUser) setUser(storedUser);
-    }
-  }, [token]);
-
   const login = (token, userData) => {
+    // Save token & user in localStorage
     localStorage.setItem("token", token);
     localStorage.setItem("user", JSON.stringify(userData));
+
     setToken(token);
-    setUser(userData); // This must include _id and name
+    setUser(userData);
   };
 
   const logout = () => {
@@ -37,8 +25,12 @@ export const AuthProvider = ({ children }) => {
     window.location.href = "/login";
   };
 
+  useEffect(() => {
+    if (!token) setUser(null);
+  }, [token]);
+
   return (
-    <AuthContext.Provider value={{ token, setToken, user, setUser, login, logout }}>
+    <AuthContext.Provider value={{ token, user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
 
 const Login = () => {
   const [currentState, setCurrentState] = useState("Sign Up");
@@ -7,6 +8,8 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const { login } = useContext(AuthContext);
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
@@ -36,12 +39,11 @@ const Login = () => {
         throw new Error(data.message || "Something went wrong!");
       }
 
-      // Save JWT Token
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("user", true);
+      // ✅ Login: Save token & user info to context and localStorage
+      login(data.token, data.user);
 
       alert(`${currentState} successful!`);
-      window.location.href = "/"; // redirect to homepage or dashboard
+      window.location.href = "/"; // redirect to homepage
 
     } catch (err) {
       console.error(err);
@@ -93,17 +95,11 @@ const Login = () => {
       <div className="flex justify-between w-full text-sm mt-[-8px]">
         <p className="cursor-pointer">Forgot your password?</p>
         {currentState === "Login" ? (
-          <p
-            onClick={() => setCurrentState("Sign Up")}
-            className="cursor-pointer"
-          >
+          <p onClick={() => setCurrentState("Sign Up")} className="cursor-pointer">
             Create a new account
           </p>
         ) : (
-          <p
-            onClick={() => setCurrentState("Login")}
-            className="cursor-pointer"
-          >
+          <p onClick={() => setCurrentState("Login")} className="cursor-pointer">
             Login here
           </p>
         )}
