@@ -16,6 +16,7 @@ import DiwaliFirework from './components/DiwaliFirework'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import PrivacyPolicy from './pages/Policy'
+import ScrollToTop from './components/ScrollToTop'
 
 const App = () => {
   return (
@@ -24,6 +25,7 @@ const App = () => {
       <ToastContainer />
       <NavBar />
       <SearchBar />
+      <ScrollToTop/>
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/collection' element={<Collection />} />
