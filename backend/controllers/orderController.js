@@ -2,7 +2,7 @@ import Order from "../models/orderModel.js";
 
 export const placeOrder = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user.id; // match verifyToken
     const { items, address, paymentMethod, totalAmount } = req.body;
 
     if (!items || !address || !paymentMethod || !totalAmount)
@@ -21,6 +21,7 @@ export const placeOrder = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
 
 export const getUserOrders = async (req, res) => {
   try {

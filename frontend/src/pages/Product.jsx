@@ -41,40 +41,40 @@ const Product = () => {
   }, [productId]);
 
   //ADD
-const handleAddReview = async () => {
-  if (!user) return alert('Please login to add a review.');
-  if (!newReview) return alert('Please write a review.');
+  const handleAddReview = async () => {
+    if (!user) return alert('Please login to add a review.');
+    if (!newReview) return alert('Please write a review.');
 
-  console.log("Sending review", {
-    userId: user._id,
-    description: newReview,
-    rating
-  });
-
-  try {
-    const res = await fetch(`http://localhost:4000/api/reviews/${productId}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        userId: user._id,       // must exist
-        description: newReview, // required by backend
-        rating
-      }),
+    console.log("Sending review", {
+      userId: user._id,
+      description: newReview,
+      rating
     });
 
-    const data = await res.json();
-    if (res.ok) {
-      setReviews((prev) => [...prev, data.review]);
-      setNewReview('');
-      setRating(5);
-    } else {
-      alert(data.message || 'Failed to add review.');
+    try {
+      const res = await fetch(`http://localhost:4000/api/reviews/${productId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user._id,       // must exist
+          description: newReview, // required by backend
+          rating
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setReviews((prev) => [...prev, data.review]);
+        setNewReview('');
+        setRating(5);
+      } else {
+        alert(data.message || 'Failed to add review.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to add review. Check console.');
     }
-  } catch (err) {
-    console.error(err);
-    alert('Failed to add review. Check console.');
-  }
-};
+  };
 
 
 
@@ -139,11 +139,15 @@ const handleAddReview = async () => {
             </div>
           </div>
           <button
-            onClick={() => addToCart(productData._id, size)}
+            onClick={() => {
+              if (!size) return alert('Please select a size');
+              addToCart(productData._id, size);
+            }}
             className='px-8 py-3 text-sm text-white bg-black active:bg-gray-700'
           >
             ADD TO CART
           </button>
+
 
           <hr className='mt-8 sm:w-4/5' />
           <div className='flex flex-col gap-1 mt-5 text-sm text-gray-500'>
