@@ -89,4 +89,6 @@ const getSingleProduct = async (req, res) => {
   }
 };
 
+
+
 export { addProduct, listProducts, removeProduct, getSingleProduct };
