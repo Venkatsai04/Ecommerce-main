@@ -15,8 +15,8 @@ const ShopContextProvider = (props) => {
   const [cartItems, setCartItems] = useState({});
   const navigate = useNavigate();
 
-  const currency = "$";
-  const delivery_fee = 10;
+  const currency = "₹";
+  const delivery_fee = 30;
 
   // ✅ Fetch products from backend API
   useEffect(() => {

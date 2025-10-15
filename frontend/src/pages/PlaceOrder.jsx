@@ -7,8 +7,47 @@ import { ShopContext } from '../context/ShopContext'
 const PlaceOrder = () => {
 
   const [method, setMethod] = useState('cod');
-  const {navigate} = useContext(ShopContext);
-  
+  const { navigate } = useContext(ShopContext);
+
+  const handlePlaceOrder = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) return alert("Please login to place an order");
+
+    const address = {
+      firstName: document.querySelector('input[placeholder="First Name"]').value,
+      lastName: document.querySelector('input[placeholder="Last Name"]').value,
+      email: document.querySelector('input[placeholder="Email Address"]').value,
+      street: document.querySelector('input[placeholder="Street"]').value,
+      city: document.querySelector('input[placeholder="City"]').value,
+      state: document.querySelector('input[placeholder="State"]').value,
+      zipCode: document.querySelector('input[placeholder="Zip Code"]').value,
+      country: document.querySelector('input[placeholder="Country"]').value,
+      mobile: document.querySelector('input[placeholder="Mobile"]').value,
+    };
+
+    const items = JSON.parse(localStorage.getItem("cartItems") || "[]");
+    const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+    const res = await fetch("http://localhost:4000/api/order/place", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ items, address, paymentMethod: method, totalAmount }),
+    });
+
+    const data = await res.json();
+    if (data.success) {
+      alert("Order placed successfully!");
+      localStorage.removeItem("cartItems");
+      navigate("/orders");
+    } else {
+      alert(data.message || "Error placing order");
+    }
+  };
+
+
   return (
     <div className='flex flex-col justify-between gap-4 pt-5 sm:flex-row sm:pt-14 min-h-[80vh] border-t'>
       {/* Left Side Content */}
@@ -17,55 +56,55 @@ const PlaceOrder = () => {
           <Title text1={'DELIVERY'} text2={'INFORMATION'} />
         </div>
         <div className='flex gap-3'>
-          <input 
-            className='w-full px-4 py-2 border border-gray-300 rounded' 
-            type="text" 
-            placeholder='First Name' 
+          <input
+            className='w-full px-4 py-2 border border-gray-300 rounded'
+            type="text"
+            placeholder='First Name'
           />
-          <input 
-            className='w-full px-4 py-2 border border-gray-300 rounded' 
-            type="text" 
-            placeholder='Last Name' 
+          <input
+            className='w-full px-4 py-2 border border-gray-300 rounded'
+            type="text"
+            placeholder='Last Name'
           />
         </div>
-        <input 
-          className='w-full px-4 py-2 border border-gray-300 rounded' 
-          type="email" 
-          placeholder='Email Address' 
+        <input
+          className='w-full px-4 py-2 border border-gray-300 rounded'
+          type="email"
+          placeholder='Email Address'
         />
-        <input 
-          className='w-full px-4 py-2 border border-gray-300 rounded' 
-          type="text" 
-          placeholder='Street' 
+        <input
+          className='w-full px-4 py-2 border border-gray-300 rounded'
+          type="text"
+          placeholder='Street'
         />
         <div className='flex gap-3'>
-          <input 
-            className='w-full px-4 py-2 border border-gray-300 rounded' 
-            type="text" 
-            placeholder='City' 
+          <input
+            className='w-full px-4 py-2 border border-gray-300 rounded'
+            type="text"
+            placeholder='City'
           />
-          <input 
-            className='w-full px-4 py-2 border border-gray-300 rounded' 
-            type="text" 
-            placeholder='State' 
+          <input
+            className='w-full px-4 py-2 border border-gray-300 rounded'
+            type="text"
+            placeholder='State'
           />
         </div>
         <div className='flex gap-3'>
-          <input 
-            className='w-full px-4 py-2 border border-gray-300 rounded' 
-            type="number" 
-            placeholder='Zip Code' 
+          <input
+            className='w-full px-4 py-2 border border-gray-300 rounded'
+            type="number"
+            placeholder='Zip Code'
           />
-          <input 
-            className='w-full px-4 py-2 border border-gray-300 rounded' 
-            type="text" 
-            placeholder='Country' 
+          <input
+            className='w-full px-4 py-2 border border-gray-300 rounded'
+            type="text"
+            placeholder='Country'
           />
         </div>
-        <input 
-          className='w-full px-4 py-2 border border-gray-300 rounded' 
-          type="number" 
-          placeholder='Mobile' 
+        <input
+          className='w-full px-4 py-2 border border-gray-300 rounded'
+          type="number"
+          placeholder='Mobile'
         />
       </div>
       {/* Right Side Content */}
@@ -91,7 +130,7 @@ const PlaceOrder = () => {
             </div>
           </div>
           <div className='w-full mt-8 text-end'>
-            <button onClick={() => navigate('/orders')} className='px-16 py-3 text-sm text-white bg-black active:bg-gray-800'>PLACE ORDER</button>
+            <button onClick={handlePlaceOrder} className='px-16 py-3 text-sm text-white bg-black active:bg-gray-800'>PLACE ORDER</button>
           </div>
         </div>
       </div>
