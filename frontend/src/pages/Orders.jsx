@@ -9,6 +9,7 @@ const Orders = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       const token = localStorage.getItem("token");
+      console.log(token);
       const res = await fetch("http://localhost:4000/api/order/user", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -16,6 +17,8 @@ const Orders = () => {
       if (data.success) setOrders(data.orders);
     };
     fetchOrders();
+    
+    
   }, []);
 
   return (

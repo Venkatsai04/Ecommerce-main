@@ -25,7 +25,7 @@ export const placeOrder = async (req, res) => {
 
 export const getUserOrders = async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = req.user.id; // match placeOrder
     const orders = await Order.find({ userId }).sort({ createdAt: -1 });
     res.json({ success: true, orders });
   } catch (error) {
