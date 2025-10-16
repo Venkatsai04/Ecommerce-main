@@ -74,6 +74,7 @@ import stripe_logo from './stripe_logo.png'
 import cross_icon from './cross_icon.png'
 import hero_diwali from './hero_diwali.jpg'
 import eco from './eco.jpg'
+import logoMini from './favicon.png'
 
 export const assets = {
     logo,
@@ -95,7 +96,8 @@ export const assets = {
     stripe_logo,
     cross_icon,
     hero_diwali,
-    eco
+    eco,
+    logoMini
 }
 
 export const products = [

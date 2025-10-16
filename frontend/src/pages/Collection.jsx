@@ -56,8 +56,9 @@ const Collection = () => {
   const clearFilters = () => setCategory([]);
 
   useEffect(() => {
-    applyFilter();
-  }, [category, search, showSearch]);
+    if (products.length > 0) applyFilter();
+  }, [category, search, showSearch, products]);
+
 
   useEffect(() => {
     sortProduct();
@@ -73,9 +74,8 @@ const Collection = () => {
         >
           <p>FILTERS</p>
           <img
-            className={`h-3 sm:hidden transition-transform ${
-              showFilter ? "rotate-90" : ""
-            }`}
+            className={`h-3 sm:hidden transition-transform ${showFilter ? "rotate-90" : ""
+              }`}
             src={assets.dropdown_icon}
             alt="Dropdown"
           />
@@ -83,9 +83,8 @@ const Collection = () => {
 
         {/* Category Filters */}
         <div
-          className={`border border-gray-200 rounded-xl shadow-sm pl-5 py-3 mt-4 transition-all duration-300 ${
-            showFilter ? "block" : "hidden"
-          } sm:block`}
+          className={`border border-gray-200 rounded-xl shadow-sm pl-5 py-3 mt-4 transition-all duration-300 ${showFilter ? "block" : "hidden"
+            } sm:block`}
         >
           <p className="mb-3 text-sm font-semibold text-gray-800">
             DIYAS CATEGORY
@@ -114,9 +113,8 @@ const Collection = () => {
         {/* Clear Filters Button */}
         <button
           onClick={clearFilters}
-          className={`px-4 py-2 mt-4 text-sm font-semibold text-white rounded-full shadow-md bg-gradient-to-r from-orange-400 to-yellow-400 hover:opacity-90 transition-all duration-300 ${
-            showFilter ? "block" : "hidden"
-          } sm:block`}
+          className={`px-4 py-2 mt-4 text-sm font-semibold text-white rounded-full shadow-md bg-gradient-to-r from-orange-400 to-yellow-400 hover:opacity-90 transition-all duration-300 ${showFilter ? "block" : "hidden"
+            } sm:block`}
         >
           Clear Filters
         </button>

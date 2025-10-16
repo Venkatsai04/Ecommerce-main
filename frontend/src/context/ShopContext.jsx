@@ -50,7 +50,7 @@ const ShopContextProvider = (props) => {
     fetchCart();
   }, [token]);
 
-  // Add or update cart item (works for Product.jsx and Cart.jsx)
+  // Add to cart
   const addToCart = async (productId, size, quantity = 1) => {
     if (!token) return toast.error("Login to add items to cart");
 
@@ -75,37 +75,55 @@ const ShopContextProvider = (props) => {
     }
   };
 
-  // Update cart item quantity
-  const updateCartItem = async (productId, size, quantity) => {
-    if (!token) return toast.error("Login to manage cart");
+  // Update cart item to exact quantity
+ const updateCartItem = async (productId, size, newQty) => {
+  if (!token) return toast.error("Login to manage cart");
 
-    try {
+  try {
+    const currentQty = cartItems[productId]?.[size] || 0;
+
+    if (newQty === 0) {
+      // DELETE route
       await axios.post(
-        `${backendUrl}/cart/add`,
-        { productId, quantity, size },
+        `${backendUrl}/cart/remove`,
+        { productId, size },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      setCartItems((prev) => {
-        const newCart = { ...prev };
-        if (quantity === 0) {
-          delete newCart[productId][size];
-          if (Object.keys(newCart[productId]).length === 0) delete newCart[productId];
-        } else {
-          if (!newCart[productId]) newCart[productId] = {};
-          newCart[productId][size] = quantity;
-        }
-        return newCart;
-      });
-    } catch (err) {
-      console.error(err);
+    } else {
+      // ADD route (compute difference)
+      const quantityDiff = newQty - currentQty;
+      if (quantityDiff > 0) {
+        await axios.post(
+          `${backendUrl}/cart/add`,
+          { productId, quantity: quantityDiff, size },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
     }
-  };
 
-  // Remove item from cart
+    // Update frontend state
+    setCartItems((prev) => {
+      const newCart = { ...prev };
+      if (newQty === 0) {
+        delete newCart[productId][size];
+        if (Object.keys(newCart[productId]).length === 0) delete newCart[productId];
+      } else {
+        if (!newCart[productId]) newCart[productId] = {};
+        newCart[productId][size] = newQty;
+      }
+      return newCart;
+    });
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to update cart");
+  }
+};
+
+
+  // Remove cart item
   const removeCartItem = (productId, size) => updateCartItem(productId, size, 0);
 
-  // Cart total count
+  // Get total count
   const getCartCount = () => {
     let total = 0;
     Object.values(cartItems).forEach((sizes) =>
@@ -114,7 +132,7 @@ const ShopContextProvider = (props) => {
     return total;
   };
 
-  // Cart total amount
+  // Get total amount
   const getCartAmount = () => {
     let total = 0;
     Object.entries(cartItems).forEach(([pid, sizes]) => {
@@ -129,7 +147,7 @@ const ShopContextProvider = (props) => {
     products,
     currency,
     cartItems,
-    addToCart,        // ✅ added
+    addToCart,
     updateCartItem,
     removeCartItem,
     getCartCount,
