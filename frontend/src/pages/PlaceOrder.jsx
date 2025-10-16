@@ -97,16 +97,15 @@ const PlaceOrder = () => {
           image: assets.logoMini,
           handler: async function (response) {
             try {
-              // Send all necessary data to /verify
               const verifyRes = await axios.post(
                 `${backendUrl}/payment/razorpay/verify`,
                 {
                   ...response,   // razorpay_order_id, razorpay_payment_id, razorpay_signature
-                  items,
+                  items,         // your cart items
                   address: form,
                   totalAmount
                 },
-                { headers: { Authorization: `Bearer ${token}` } }
+                { headers: { Authorization: `Bearer ${token}` } }  // important!
               );
 
               if (verifyRes.data.success) {
@@ -114,14 +113,14 @@ const PlaceOrder = () => {
                 clearCart();
                 navigate("/orders");
               } else {
-                toast.error(verifyRes.data.message || "Payment verification failed");
+                toast.error("Payment verification failed");
               }
-
             } catch (err) {
               console.error(err);
-              toast.error("Something went wrong with payment verification");
+              toast.error("Something went wrong during payment verification");
             }
-          },
+          }
+          ,
           prefill: {
             name: form.firstName + " " + form.lastName,
             email: form.email,
@@ -152,20 +151,20 @@ const PlaceOrder = () => {
           <Title text1={'DELIVERY'} text2={'INFORMATION'} />
         </div>
         <div className='flex gap-3'>
-          <input className='w-full px-4 py-2 border border-gray-300 rounded' type="text" name="firstName" value={form.firstName} onChange={handleInputChange} placeholder='First Name'/>
-          <input className='w-full px-4 py-2 border border-gray-300 rounded' type="text" name="lastName" value={form.lastName} onChange={handleInputChange} placeholder='Last Name'/>
+          <input className='w-full px-4 py-2 border border-gray-300 rounded' type="text" name="firstName" value={form.firstName} onChange={handleInputChange} placeholder='First Name' />
+          <input className='w-full px-4 py-2 border border-gray-300 rounded' type="text" name="lastName" value={form.lastName} onChange={handleInputChange} placeholder='Last Name' />
         </div>
-        <input className='w-full px-4 py-2 border border-gray-300 rounded' type="email" name="email" value={form.email} onChange={handleInputChange} placeholder='Email Address'/>
-        <input className='w-full px-4 py-2 border border-gray-300 rounded' type="text" name="street" value={form.street} onChange={handleInputChange} placeholder='Street'/>
+        <input className='w-full px-4 py-2 border border-gray-300 rounded' type="email" name="email" value={form.email} onChange={handleInputChange} placeholder='Email Address' />
+        <input className='w-full px-4 py-2 border border-gray-300 rounded' type="text" name="street" value={form.street} onChange={handleInputChange} placeholder='Street' />
         <div className='flex gap-3'>
-          <input className='w-full px-4 py-2 border border-gray-300 rounded' type="text" name="city" value={form.city} onChange={handleInputChange} placeholder='City'/>
-          <input className='w-full px-4 py-2 border border-gray-300 rounded' type="text" name="state" value={form.state} onChange={handleInputChange} placeholder='State'/>
+          <input className='w-full px-4 py-2 border border-gray-300 rounded' type="text" name="city" value={form.city} onChange={handleInputChange} placeholder='City' />
+          <input className='w-full px-4 py-2 border border-gray-300 rounded' type="text" name="state" value={form.state} onChange={handleInputChange} placeholder='State' />
         </div>
         <div className='flex gap-3'>
-          <input className='w-full px-4 py-2 border border-gray-300 rounded' type="number" name="zip" value={form.zip} onChange={handleInputChange} placeholder='Zip Code'/>
-          <input className='w-full px-4 py-2 border border-gray-300 rounded' type="text" name="country" value={form.country} onChange={handleInputChange} placeholder='Country'/>
+          <input className='w-full px-4 py-2 border border-gray-300 rounded' type="number" name="zip" value={form.zip} onChange={handleInputChange} placeholder='Zip Code' />
+          <input className='w-full px-4 py-2 border border-gray-300 rounded' type="text" name="country" value={form.country} onChange={handleInputChange} placeholder='Country' />
         </div>
-        <input className='w-full px-4 py-2 border border-gray-300 rounded' type="number" name="mobile" value={form.mobile} onChange={handleInputChange} placeholder='Mobile'/>
+        <input className='w-full px-4 py-2 border border-gray-300 rounded' type="number" name="mobile" value={form.mobile} onChange={handleInputChange} placeholder='Mobile' />
       </div>
 
       <div className='mt-8'>
