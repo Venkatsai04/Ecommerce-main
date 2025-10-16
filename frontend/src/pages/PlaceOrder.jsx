@@ -82,11 +82,13 @@ const PlaceOrder = () => {
         toast.success("Order placed successfully");
         clearCart();
         navigate("/orders");
+
       } else if (method === "razorpay") {
-        // Razorpay order creation
+        // Create Razorpay order
         const { data } = await axios.post(`${backendUrl}/payment/razorpay/order`, { amount: totalAmount });
+
         const options = {
-          key: "rzp_test_RU9gYhxqiyBnDV", // your Razorpay key
+          key: "rzp_test_RU9gYhxqiyBnDV",
           amount: data.order.amount,
           currency: "INR",
           name: "Sahara Traders",
@@ -94,19 +96,30 @@ const PlaceOrder = () => {
           order_id: data.order.id,
           image: assets.logoMini,
           handler: async function (response) {
-            // Verify payment on backend
-            const verifyRes = await axios.post(`${backendUrl}/payment/razorpay/verify`, response);
-            if (verifyRes.data.success) {
-              // Place order after successful payment
-              await axios.post(`${backendUrl}/order/place`,
-                { items, address: form, paymentMethod: "razorpay", totalAmount },
+            try {
+              // Send all necessary data to /verify
+              const verifyRes = await axios.post(
+                `${backendUrl}/payment/razorpay/verify`,
+                {
+                  ...response,   // razorpay_order_id, razorpay_payment_id, razorpay_signature
+                  items,
+                  address: form,
+                  totalAmount
+                },
                 { headers: { Authorization: `Bearer ${token}` } }
               );
-              toast.success("Payment successful and order placed!");
-              clearCart();
-              navigate("/orders");
-            } else {
-              toast.error("Payment verification failed");
+
+              if (verifyRes.data.success) {
+                toast.success("Payment successful and order placed!");
+                clearCart();
+                navigate("/orders");
+              } else {
+                toast.error(verifyRes.data.message || "Payment verification failed");
+              }
+
+            } catch (err) {
+              console.error(err);
+              toast.error("Something went wrong with payment verification");
             }
           },
           prefill: {
@@ -116,9 +129,11 @@ const PlaceOrder = () => {
           },
           theme: { color: "#3399cc" },
         };
+
         const razor = new window.Razorpay(options);
         razor.open();
       }
+
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong. Please try again.");
