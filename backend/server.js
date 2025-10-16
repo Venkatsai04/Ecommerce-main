@@ -28,7 +28,7 @@ app.use("/api/product", productRouter);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/order", orderRoutes);
 app.use("/api", cartRoutes);
-app.use('/api/payment', paymentRoutes);
+app.use('/api/payment/razorpay', paymentRoutes);
 
 
 // INFO: Default route
