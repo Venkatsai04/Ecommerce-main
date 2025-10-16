@@ -155,7 +155,7 @@ const PlaceOrder = () => {
               <div key={m} onClick={() => setMethod(m)} className='flex items-center gap-3 p-2 px-3 border cursor-pointer'>
                 <p className={`min-w-3.5 h-3.5 border rounded-full ${method === m ? 'bg-green-600' : ''}`}></p>
                 {m === 'stripe' && <img className='h-5 mx-4' src={assets.stripe_logo} alt="Stripe" />}
-                {m === 'razorpay' && <img className='h-5 mx-4' src={assets.razorpay_logo} alt="RazorPay" />}
+                {m === 'razorpay' &&  <img className='h-5 mx-4' src={assets.razorpay_logo} alt="RazorPay" />}
                 {m === 'cod' && <p className='mx-4 text-sm font-medium text-gray-500'>CASH ON DELIVERY</p>}
               </div>
             ))}
