@@ -1,19 +1,20 @@
 import React, { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const [currentState, setCurrentState] = useState("Sign Up");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const navigate = useNavigate();
   const { login } = useContext(AuthContext);
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
-    setError("");
     setLoading(true);
 
     try {
@@ -36,18 +37,20 @@ const Login = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Something went wrong!");
+        // ❌ Show error toast for invalid credentials or other errors
+        toast.error(data.message || "Something went wrong!");
+        return;
       }
 
-      // ✅ Login: Save token & user info to context and localStorage
+      // ✅ Login or Signup successful
       login(data.token, data.user);
+      toast.success(`${currentState} successful!`);
 
-      alert(`${currentState} successful!`);
-      window.location.href = "/"; // redirect to homepage
-
+      // Navigate to home or dashboard after a short delay
+      setTimeout(() => navigate("/"), 1000);
     } catch (err) {
       console.error(err);
-      setError(err.message);
+      toast.error("Network error! Please try again.");
     } finally {
       setLoading(false);
     }
@@ -104,8 +107,6 @@ const Login = () => {
           </p>
         )}
       </div>
-
-      {error && <p className="text-sm text-red-500">{error}</p>}
 
       <button
         disabled={loading}

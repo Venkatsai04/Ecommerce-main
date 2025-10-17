@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import { ShopContext } from '../context/ShopContext';
 import { AuthContext } from '../context/AuthContext';
 import { assets } from '../assets/assets';
@@ -7,7 +7,7 @@ import RelatedProducts from '../components/RelatedProducts';
 
 const Product = () => {
   const { productId } = useParams();
-  const { products, currency, addToCart } = useContext(ShopContext);
+  const { products, currency, addToCart ,navigate} = useContext(ShopContext);
   const { user } = useContext(AuthContext);
 
   const [productData, setProductData] = useState(null);
@@ -43,6 +43,7 @@ const Product = () => {
   //ADD
   const handleAddReview = async () => {
     if (!user) return alert('Please login to add a review.');
+  
     if (!newReview) return alert('Please write a review.');
 
     console.log("Sending review", {

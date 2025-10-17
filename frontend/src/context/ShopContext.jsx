@@ -52,7 +52,11 @@ const ShopContextProvider = (props) => {
 
   // Add to cart
   const addToCart = async (productId, size, quantity = 1) => {
-    if (!token) return toast.error("Login to add items to cart");
+    if (!token) {
+      navigate('/login');
+      toast.error("Login to add items to cart");
+      return;
+    } 
 
     try {
       await axios.post(

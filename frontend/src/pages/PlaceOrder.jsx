@@ -44,10 +44,10 @@ const PlaceOrder = () => {
     return true;
   };
 
-  const clearCart = () => {
-    localStorage.removeItem("cart");
-    updateCartItem({});
-  };
+  // const clearCart = () => {
+  //   localStorage.removeItem("cart");
+  //   updateCartItem({});
+  // };
 
   const handlePlaceOrder = async () => {
     if (!token) return toast.error("Login to place an order");
@@ -69,7 +69,6 @@ const PlaceOrder = () => {
     });
 
     if (items.length === 0) return toast.error("Cart is empty");
-
     const totalAmount = getCartAmount();
 
     try {
