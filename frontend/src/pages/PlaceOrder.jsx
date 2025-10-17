@@ -100,18 +100,18 @@ const PlaceOrder = () => {
               const verifyRes = await axios.post(
                 `${backendUrl}/payment/razorpay/verify`,
                 {
-                  ...response,   // razorpay_order_id, razorpay_payment_id, razorpay_signature
-                  items,         // your cart items
+                  ...response,   // includes razorpay_order_id, razorpay_payment_id, razorpay_signature
+                  items,
                   address: form,
-                  totalAmount
+                  totalAmount,
                 },
-                { headers: { Authorization: `Bearer ${token}` } }  // important!
+                { headers: { Authorization: `Bearer ${token}` } }
               );
 
               if (verifyRes.data.success) {
                 toast.success("Payment successful and order placed!");
-                clearCart();
-                navigate("/orders");
+                clearCart(); // ✅ now works
+                navigate("/orders"); // ✅ redirect after clear
               } else {
                 toast.error("Payment verification failed");
               }
@@ -119,8 +119,9 @@ const PlaceOrder = () => {
               console.error(err);
               toast.error("Something went wrong during payment verification");
             }
-          }
-          ,
+          },
+
+
           prefill: {
             name: form.firstName + " " + form.lastName,
             email: form.email,
