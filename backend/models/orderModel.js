@@ -36,9 +36,11 @@ const orderSchema = new mongoose.Schema(
     totalAmount: { type: Number, required: true },
     status: {
       type: String,
-      enum: ["Pending", "Processing", "Ready for Shipping", "Delivered"],
+      enum: ["Pending", "Paid", "Processing", "Ready for Shipping", "Delivered", "Failed"],
       default: "Pending",
     },
+    razorpayOrderId: String,
+    razorpayPaymentId: String,
   },
   { timestamps: true }
 );

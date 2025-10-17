@@ -85,7 +85,13 @@ const PlaceOrder = () => {
 
       } else if (method === "razorpay") {
         // Create Razorpay order
-        const { data } = await axios.post(`${backendUrl}/payment/razorpay/order`, { amount: totalAmount });
+        const { data } = await axios.post(
+          `${backendUrl}/payment/razorpay/create-order`,
+          { amount: totalAmount * 100 }, // ✅ Razorpay expects paise
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+
+
 
         const options = {
           key: "rzp_test_RU9gYhxqiyBnDV",
