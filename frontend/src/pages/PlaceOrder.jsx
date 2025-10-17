@@ -14,7 +14,7 @@ const PlaceOrder = () => {
     products,
     currency,
     updateCartItem,
-    removeCartItem,
+    removeCartItems,
     getCartAmount,
     navigate,
   } = useContext(ShopContext);
@@ -79,9 +79,11 @@ const PlaceOrder = () => {
           { items, address: form, paymentMethod: "cod", totalAmount },
           { headers: { Authorization: `Bearer ${token}` } }
         );
+
         toast.success("Order placed successfully");
-        clearCart();
+        removeCartItems(items); // only remove ordered items
         navigate("/orders");
+
 
       } else if (method === "razorpay") {
         // Create Razorpay order
@@ -116,8 +118,9 @@ const PlaceOrder = () => {
 
               if (verifyRes.data.success) {
                 toast.success("Payment successful and order placed!");
-                clearCart(); // ✅ now works
-                navigate("/orders"); // ✅ redirect after clear
+                removeCartItems(items); // ✅ remove only ordered items
+                navigate("/orders");
+
               } else {
                 toast.error("Payment verification failed");
               }
