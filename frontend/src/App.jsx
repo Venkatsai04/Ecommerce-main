@@ -18,6 +18,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import PrivacyPolicy from './pages/Policy'
 import ScrollToTop from './components/ScrollToTop'
 import Profile from './pages/Profile'
+import PaymentSuccess from './pages/PaymentSucces'
 
 const App = () => {
   return (
@@ -39,6 +40,7 @@ const App = () => {
         <Route path='/orders' element={<Orders />} />
         <Route path='/privacy-policy' element={<PrivacyPolicy />} />
         <Route path='/Profile' element={<Profile/>} />
+         <Route path="/payment-success" element={<PaymentSuccess />} />
       </Routes>
       <Footer />
     </div>

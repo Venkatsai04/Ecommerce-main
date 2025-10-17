@@ -119,7 +119,7 @@ const PlaceOrder = () => {
               if (verifyRes.data.success) {
                 toast.success("Payment successful and order placed!");
                 items.forEach(({ productId, size }) => removeCartItem(productId, size));
-                navigate("/orders"); // ✅ redirect after clear
+                navigate("/payment-success", { state: { totalAmount } });
               } else {
                 toast.error("Payment verification failed");
               }
