@@ -14,7 +14,7 @@ const PlaceOrder = () => {
     products,
     currency,
     updateCartItem,
-    removeCartItems,
+    removeCartItem,
     getCartAmount,
     navigate,
   } = useContext(ShopContext);
@@ -81,7 +81,7 @@ const PlaceOrder = () => {
         );
 
         toast.success("Order placed successfully");
-        removeCartItems(items); // only remove ordered items
+        removeCartItem(items); // only remove ordered items
         navigate("/orders");
 
 
@@ -118,9 +118,8 @@ const PlaceOrder = () => {
 
               if (verifyRes.data.success) {
                 toast.success("Payment successful and order placed!");
-                removeCartItems(items); // ✅ remove only ordered items
-                navigate("/orders");
-
+                items.forEach(({ productId, size }) => removeCartItem(productId, size));
+                navigate("/orders"); // ✅ redirect after clear
               } else {
                 toast.error("Payment verification failed");
               }

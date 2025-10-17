@@ -121,28 +121,7 @@ const ShopContextProvider = (props) => {
 
 
   // Remove cart item
- const removeCartItems = (itemsToRemove) => {
-  const updatedCart = { ...cartItems };
-
-  itemsToRemove.forEach((item) => {
-    const { productId, size } = item;
-
-    if (updatedCart[productId]) {
-      if (updatedCart[productId][size]) {
-        delete updatedCart[productId][size]; // remove that size
-
-        // If no more sizes for this product, delete the product entry
-        if (Object.keys(updatedCart[productId]).length === 0) {
-          delete updatedCart[productId];
-        }
-      }
-    }
-  });
-
-  setCartItems(updatedCart);
-  localStorage.setItem("cart", JSON.stringify(updatedCart));
-};
-
+  const removeCartItem = (productId, size) => updateCartItem(productId, size, 0);
 
   // Get total count
   const getCartCount = () => {
@@ -170,7 +149,7 @@ const ShopContextProvider = (props) => {
     cartItems,
     addToCart,
     updateCartItem,
-    removeCartItems,
+    removeCartItem,
     getCartCount,
     getCartAmount,
     navigate,
