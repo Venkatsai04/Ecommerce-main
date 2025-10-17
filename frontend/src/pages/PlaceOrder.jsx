@@ -64,7 +64,10 @@ const PlaceOrder = () => {
           size,
           quantity: qty,
           price: product.price,
+          image: Array.isArray(product.image) ? product.image[0] : product.image, // ✅ pick first image
         });
+
+
       });
     });
 
@@ -80,7 +83,7 @@ const PlaceOrder = () => {
         );
 
         toast.success("Order placed successfully");
-        removeCartItem(items); // only remove ordered items
+        items.forEach(({ productId, size }) => removeCartItem(productId, size));
         navigate("/orders");
 
 
