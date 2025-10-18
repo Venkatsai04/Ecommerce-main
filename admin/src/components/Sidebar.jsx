@@ -21,7 +21,7 @@ const Sidebar = () => {
         </button>
       </div>
 
-      <div className="flex flex-col gap-3 px-3">
+      <div className="flex flex-col gap-3 px-2">
         {[
           { to: "/add", icon: assets.add_icon, label: "Add Product" },
           { to: "/list", icon: assets.parcel_icon, label: "Product List" },
@@ -31,14 +31,20 @@ const Sidebar = () => {
             key={idx}
             to={link.to}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              `flex items-center ${
+                collapsed ? "justify-center" : "gap-3 px-3"
+              } py-3 rounded-lg transition-colors ${
                 isActive ? "bg-gray-900 text-white" : "hover:bg-gray-100"
               }`
             }
           >
-            <img src={link.icon} alt={link.label} className="w-5 h-5" />
+            <div className="flex justify-center items-center w-6 h-6 flex-shrink-0">
+              <img src={link.icon} alt={link.label} className="w-5 h-5" />
+            </div>
             {!collapsed && (
-              <span className="text-[15px] font-medium">{link.label}</span>
+              <span className="text-[15px] font-medium whitespace-nowrap">
+                {link.label}
+              </span>
             )}
           </NavLink>
         ))}
