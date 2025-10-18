@@ -46,28 +46,28 @@ const NewsLetterBox = () => {
         event.preventDefault();
         const emailInput = event.target.elements[0].value;
 
-        try {
-            const res = await fetch("https://api.brevo.com/v3/smtp/email", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "api-key": "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"
-                },
-                body: JSON.stringify({
-                    sender: { name: "Sahara Store", email: "sahara.store.online@gmail.com" },
-                    to: [{ email: emailInput }],
-                    subject: "Welcome to Sahara Store - Get 20% Off!",
-                    htmlContent: emailTemplate(emailInput)
-                })
-            });
+        // try {
+        //     const res = await fetch("https://api.brevo.com/v3/smtp/email", {
+        //         method: "POST",
+        //         headers: {
+        //             "Content-Type": "application/json",
+        //             "api-key": "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"
+        //         },
+        //         body: JSON.stringify({
+        //             sender: { name: "Sahara Store", email: "sahara.store.online@gmail.com" },
+        //             to: [{ email: emailInput }],
+        //             subject: "Welcome to Sahara Store - Get 20% Off!",
+        //             htmlContent: emailTemplate(emailInput)
+        //         })
+        //     });
 
-            const data = await res.json();
-            console.log(data);
-            alert("Subscription successful!");
-        } catch (err) {
-            console.error(err);
-            alert("Failed to subscribe. Try again!");
-        }
+        //     const data = await res.json();
+        //     console.log(data);
+        //     alert("Subscription successful!");
+        // } catch (err) {
+        //     console.error(err);
+        //     alert("Failed to subscribe. Try again!");
+        // }
     }
 
     return (
