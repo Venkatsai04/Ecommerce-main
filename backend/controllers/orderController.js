@@ -1,5 +1,6 @@
 import Order from "../models/orderModel.js";
 
+
 export const placeOrder = async (req, res) => {
   try {
     const userId = req.user.id; // match verifyToken
@@ -21,6 +22,20 @@ export const placeOrder = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+
+export const getAllOrders = async (req, res) => {
+  try {
+    const orders = await Order.find()
+      .populate("userId", "name email") // optional: show user details
+      .sort({ createdAt: -1 });
+
+    res.json({ success: true, orders });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 
 
 export const getUserOrders = async (req, res) => {
