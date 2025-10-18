@@ -38,8 +38,6 @@ const emailTemplate = (userEmail) => `
 </html>
 `;
 
-
-
 const NewsLetterBox = () => {
 
     const onSubmitHandler = async (event) => {
