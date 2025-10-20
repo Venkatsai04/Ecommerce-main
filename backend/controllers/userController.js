@@ -108,7 +108,7 @@ const loginAdmin = async (req, res) => {
       password === process.env.ADMIN_PASSWORD
     ) {
       // ✅ Fix: Sign token with an object payload
-      const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "1d" });
+      const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: "7d" });
       res.status(200).json({ success: true, token });
     } else {
       res.status(400).json({ success: false, message: "Invalid email or password" });

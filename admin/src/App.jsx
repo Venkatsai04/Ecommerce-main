@@ -32,7 +32,7 @@ const App = () => {
         <div className="flex flex-col min-h-screen">
           <Navbar setToken={setToken} />
           <div className="flex flex-1 pt-16">
-            <Sidebar />
+           
             <main className="flex-1 p-4 md:p-8 overflow-y-auto">
               <Routes>
                 <Route path="/add" element={<Add token={token} />} />

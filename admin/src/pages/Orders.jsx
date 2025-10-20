@@ -7,7 +7,6 @@ const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Fetch all orders (admin route)
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -32,7 +31,6 @@ const Orders = () => {
     fetchOrders();
   }, []);
 
-  // ✅ Loading state
   if (loading)
     return (
       <div className="flex items-center justify-center min-h-[70vh] text-gray-600">
@@ -40,7 +38,6 @@ const Orders = () => {
       </div>
     );
 
-  // ✅ Empty state
   if (orders.length === 0)
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] text-gray-600">
@@ -57,16 +54,29 @@ const Orders = () => {
     <div className="w-full p-4 bg-white rounded-xl shadow-md">
       <h2 className="mb-6 text-2xl font-semibold text-gray-800">All Orders</h2>
 
+      {/* Horizontal scroll wrapper */}
       <div className="overflow-x-auto">
-        <table className="w-full border border-gray-200 divide-y divide-gray-200 rounded-lg">
+        <table className="min-w-[900px] w-full border border-gray-200 divide-y divide-gray-200 rounded-lg">
           <thead className="bg-gray-100">
             <tr>
-              <th className="px-4 py-3 text-sm font-semibold text-left text-gray-700">User</th>
-              <th className="px-4 py-3 text-sm font-semibold text-left text-gray-700">Items</th>
-              <th className="px-4 py-3 text-sm font-semibold text-left text-gray-700">Total</th>
-              <th className="px-4 py-3 text-sm font-semibold text-left text-gray-700">Payment</th>
-              <th className="px-4 py-3 text-sm font-semibold text-left text-gray-700">Status</th>
-              <th className="px-4 py-3 text-sm font-semibold text-left text-gray-700">Date</th>
+              <th className="px-4 py-3 text-sm font-semibold text-left text-gray-700">
+                User
+              </th>
+              <th className="px-4 py-3 text-sm font-semibold text-left text-gray-700">
+                Items
+              </th>
+              <th className="px-4 py-3 text-sm font-semibold text-left text-gray-700">
+                Total
+              </th>
+              <th className="px-4 py-3 text-sm font-semibold text-left text-gray-700">
+                Payment
+              </th>
+              <th className="px-4 py-3 text-sm font-semibold text-left text-gray-700">
+                Status
+              </th>
+              <th className="px-4 py-3 text-sm font-semibold text-left text-gray-700">
+                Date
+              </th>
             </tr>
           </thead>
 
@@ -76,13 +86,16 @@ const Orders = () => {
                 key={order._id}
                 className="transition-all hover:bg-gray-50"
               >
-                <td className="px-4 py-3 text-sm text-gray-700">
+                <td className="px-4 py-3 text-sm text-gray-700 whitespace-nowrap">
                   {order.userId?.email || "Guest"}
                 </td>
 
                 <td className="px-4 py-3 text-sm text-gray-700">
                   {order.items.map((item, i) => (
-                    <div key={i} className="flex items-center gap-2 mb-2">
+                    <div
+                      key={i}
+                      className="flex items-center gap-2 mb-2 min-w-max"
+                    >
                       <img
                         src={Array.isArray(item.image) ? item.image[0] : item.image}
                         alt={item.name}
@@ -98,15 +111,15 @@ const Orders = () => {
                   ))}
                 </td>
 
-                <td className="px-4 py-3 text-sm font-semibold text-gray-800">
+                <td className="px-4 py-3 text-sm font-semibold text-gray-800 whitespace-nowrap">
                   ₹{order.totalAmount.toLocaleString("en-IN")}
                 </td>
 
-                <td className="px-4 py-3 text-sm capitalize text-gray-700">
+                <td className="px-4 py-3 text-sm capitalize text-gray-700 whitespace-nowrap">
                   {order.paymentMethod}
                 </td>
 
-                <td className="px-4 py-3 text-sm">
+                <td className="px-4 py-3 text-sm whitespace-nowrap">
                   <span
                     className={`px-3 py-1 rounded-full text-xs font-medium ${
                       order.status === "Delivered"
@@ -120,7 +133,7 @@ const Orders = () => {
                   </span>
                 </td>
 
-                <td className="px-4 py-3 text-sm text-gray-500">
+                <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
                   {new Date(order.createdAt).toLocaleDateString()}
                 </td>
               </tr>
