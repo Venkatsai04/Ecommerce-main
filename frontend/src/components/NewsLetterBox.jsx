@@ -49,7 +49,7 @@ const NewsLetterBox = () => {
 
     return (
         <div className='mt-10 text-center'>
-            <p className='text-2xl font-medium text-gray-800'>Unlock 20% Off | Subscribe Today!</p>
+            <p className='text-2xl font-medium text-gray-800'>Unlock 30% Off | Subscribe Today!</p>
             <p className='mt-3 text-gray-400'>Don't miss out—unlock your savings now by subscribing below!</p>
             <form onSubmit={onSubmitHandler} className='flex items-center w-full gap-3 pl-3 mx-auto my-6 border sm:w-1/2'>
                 <input 
