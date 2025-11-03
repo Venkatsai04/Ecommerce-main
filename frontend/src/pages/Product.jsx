@@ -40,7 +40,7 @@ const Product = () => {
     fetchReviews();
   }, [productId]);
 
-  //ADD
+  //ADD review
   const handleAddReview = async () => {
     if (!user) return alert('Please login to add a review.');
   
