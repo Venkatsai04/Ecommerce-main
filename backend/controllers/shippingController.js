@@ -52,7 +52,6 @@ const getShiprocketToken = async () => {
   return token;
 };
 
-// 🚚 Main controller — check delivery availability
 export const checkPincodeAvailability = async (req, res) => {
   try {
     const { pincode } = req.body;
@@ -65,34 +64,46 @@ export const checkPincodeAvailability = async (req, res) => {
       "https://apiv2.shiprocket.in/v1/external/courier/serviceability",
       {
         params: {
-          pickup_postcode: "501505", // your origin pincode
+          pickup_postcode: "500001", // your warehouse pincode
           delivery_postcode: pincode,
           weight: 0.5,
           cod: 1,
         },
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       }
     );
 
-    const data = response.data;
+    const couriers = response.data?.data?.available_courier_companies || [];
 
-    if (
-      !data.data ||
-      !data.data.available_courier_companies ||
-      data.data.available_courier_companies.length === 0
-    ) {
+    if (couriers.length === 0)
       return res.json({ available: false, message: "Delivery not available" });
-    }
 
-    const courier = data.data.available_courier_companies[0];
+    // Filter only couriers with valid estimated days
+    const validCouriers = couriers.filter(
+      (c) => c.estimated_delivery_days && c.estimated_delivery_days > 0
+    );
+
+    if (validCouriers.length === 0)
+      return res.json({
+        available: true,
+        delivery_range: "N/A",
+        min_charges: couriers[0].rate.toFixed(2),
+      });
+
+    const minDays = Math.min(
+      ...validCouriers.map((c) => c.estimated_delivery_days)
+    );
+    const maxDays = Math.max(
+      ...validCouriers.map((c) => c.estimated_delivery_days)
+    );
+
+    // Find cheapest courier
+    const cheapest = couriers.reduce((a, b) => (a.rate < b.rate ? a : b));
 
     res.json({
       available: true,
-      courier_name: courier.courier_name,
-      est_delivery_days: courier.estimated_delivery_days,
-      charges: courier.rate,
+      delivery_range: `${minDays}-${maxDays}`,
+      min_charges: cheapest.rate.toFixed(2),
     });
   } catch (err) {
     console.error("❌ Shiprocket Error:", {

@@ -100,9 +100,8 @@ const Product = () => {
                 src={item}
                 key={index}
                 onClick={() => setImage(item)}
-                className={`w-[24%] sm:w-full sm:mb-3 flex-shrink-0 cursor-pointer ${
-                  image === item ? "border-2 border-gray-600 py-2 px-2" : ""
-                }`}
+                className={`w-[24%] sm:w-full sm:mb-3 flex-shrink-0 cursor-pointer ${image === item ? "border-2 border-gray-600 py-2 px-2" : ""
+                  }`}
                 alt="Product"
               />
             ))}
@@ -127,9 +126,8 @@ const Product = () => {
                 <button
                   key={index}
                   onClick={() => setSize(item)}
-                  className={`border py-2 px-4 bg-gray-100 rounded-md ${
-                    item === size ? "border-orange-500" : ""
-                  }`}
+                  className={`border py-2 px-4 bg-gray-100 rounded-md ${item === size ? "border-orange-500" : ""
+                    }`}
                 >
                   {item}
                 </button>
@@ -147,44 +145,55 @@ const Product = () => {
             ADD TO CART
           </button>
 
+
           {/* --- Delivery Check Section --- */}
-          <div className="mt-6 border-t pt-4">
-            <h3 className="font-semibold text-base mb-2">Check Delivery Availability</h3>
-            <div className="flex gap-2">
+          <div className="mt-6 border-t pt-5">
+            <h3 className="text-lg font-extrabold mb-3 uppercase tracking-tight">
+              Delivery Check
+            </h3>
+
+            <div className="flex gap-2 items-center">
               <input
                 type="text"
                 value={pincode}
                 onChange={(e) => setPincode(e.target.value)}
-                placeholder="Enter your pincode"
-                className="border p-2 rounded w-36"
+                placeholder="Enter Pincode"
+                className="border-2 border-black bg-yellow-50 text-black px-4 py-2 w-40 font-semibold tracking-wide placeholder:text-gray-500 focus:outline-none focus:border-gray-800 transition-all"
               />
               <button
                 onClick={handleCheckPincode}
-                className="bg-blue-600 text-white px-4 py-2 rounded"
                 disabled={loading}
+                className="bg-black text-white px-5 py-2 border-2 border-black active:translate-y-[2px] active:border-gray-700 transition-all"
               >
                 {loading ? "Checking..." : "Check"}
               </button>
             </div>
 
             {deliveryInfo && (
-              <div className="mt-3 text-sm">
+              <div
+                className={`mt-4 border-2 ${deliveryInfo.available ? "border-black" : "border-red-500"
+                  } bg-white p-3`}
+              >
                 {deliveryInfo.available ? (
-                  <p className="text-green-600">
-                    ✅ Delivery available via <b>{deliveryInfo.courier_name}</b>
-                    <br />
-                    Estimated delivery: {deliveryInfo.est_delivery_days} days
-                    <br />
-                    Shipping charges: ₹{deliveryInfo.charges}
+                  <p className="text-base font-bold text-black">
+                    🚚 Delivery in{" "}
+                    <span className="underline">
+                      {deliveryInfo.delivery_range === "N/A"
+                        ? "a few days"
+                        : `${deliveryInfo.delivery_range} days`}
+                    </span>{" "}
+                    (from ₹{deliveryInfo.min_charges})
                   </p>
                 ) : (
-                  <p className="text-red-600">
-                    ❌ {deliveryInfo.message || "Delivery not available for this pincode."}
+                  <p className="text-red-600 font-semibold">
+                    ❌ Delivery not available for this area
                   </p>
                 )}
               </div>
             )}
+
           </div>
+
         </div>
       </div>
 
