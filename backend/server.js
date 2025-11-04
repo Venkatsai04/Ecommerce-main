@@ -10,6 +10,8 @@ import reviewRoutes from "./routes/reviewRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import paymentRoutes from './routes/paymentRoute.js';
+import shippingRoutes from "./routes/shippingRoutes.js";
+
 
 
 // INFO: Create express app
@@ -29,6 +31,8 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/order", orderRoutes);
 app.use("/api", cartRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use("/api/shipping", shippingRoutes);
+
 
 
 // INFO: Default route
