@@ -57,7 +57,9 @@ const PlaceOrder = () => {
         const res = await axios.post(`${backendUrl}/shipping/check-pincode`, { pincode: form.zip });
         setDeliveryInfo(res.data);
         if (res.data.available) {
-          setDeliveryFee(res.data.shipping_fee || 0);
+          setDeliveryFee(res.data.min_charges || 0);
+          console.log(res.data);
+          
         } else {
           setDeliveryFee(0);
           toast.error(res.data.message || "Delivery not available to this pincode");
