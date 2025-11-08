@@ -2,19 +2,28 @@ import React, { useContext } from 'react';
 import { ShopContext } from '../context/ShopContext';
 import Title from './Title';
 
-const CartTotal = ({delivery_fee}) => {
-  const { currency,  cartItems, products, updateCartItem, removeCartItem } = useContext(ShopContext);
+const CartTotal = ({ delivery_fee = 0 }) => {
+  const { currency, cartItems, products, updateCartItem, removeCartItem } = useContext(ShopContext);
 
-  console.log(delivery_fee);
-  
-
+  // ✅ Calculate subtotal
   const subtotal = Object.entries(cartItems).reduce((acc, [pid, sizes]) => {
     const product = products.find(p => p._id === pid);
     if (!product) return acc;
     return acc + Object.values(sizes).reduce((sum, qty) => sum + qty * product.price, 0);
   }, 0);
 
-  const total = subtotal + delivery_fee;
+  // ✅ Ensure delivery_fee is numeric
+  const numericDeliveryFee = Number(delivery_fee) || 0;
+
+  // ✅ Total
+  const total = subtotal + numericDeliveryFee;
+
+  // ✅ Currency formatter (Indian format)
+  const formatCurrency = (amount) =>
+    amount.toLocaleString('en-IN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
 
   return (
     <div className='w-full'>
@@ -31,7 +40,7 @@ const CartTotal = ({delivery_fee}) => {
             <div key={`${pid}-${size}`} className='flex items-center justify-between border p-2 rounded'>
               <div>
                 <p className='font-medium'>{product.name} ({size})</p>
-                <p className='text-sm text-gray-500'>{currency}{product.price.toLocaleString()}</p>
+                <p className='text-sm text-gray-500'>{currency}{formatCurrency(product.price)}</p>
               </div>
               <div className='flex items-center gap-2'>
                 <button onClick={() => updateCartItem(pid, size, qty - 1)} className='px-2 border rounded'>-</button>
@@ -44,25 +53,26 @@ const CartTotal = ({delivery_fee}) => {
         })}
       </div>
 
+      {/* Totals Section */}
       <div className='flex flex-col gap-2 mt-6 text-sm'>
         <div className='flex justify-between'>
           <p className='text-lg font-medium'>Sub Total</p>
           <p className='text-lg font-medium'>
-            {currency}&nbsp;{subtotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {currency}&nbsp;{formatCurrency(subtotal)}
           </p>
         </div>
         <hr />
         <div className='flex justify-between'>
           <p className='text-lg font-medium'>Shipping Fee</p>
           <p className='text-lg font-medium'>
-            {currency}&nbsp;{delivery_fee.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {currency}&nbsp;{formatCurrency(numericDeliveryFee)}
           </p>
         </div>
         <hr />
         <div className='flex justify-between'>
           <p className='text-2xl font-semibold'>Total Amount</p>
           <p className='text-2xl font-semibold'>
-            {currency}&nbsp;{total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {currency}&nbsp;{formatCurrency(total)}
           </p>
         </div>
       </div>
