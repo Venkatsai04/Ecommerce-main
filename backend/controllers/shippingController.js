@@ -64,7 +64,7 @@ export const checkPincodeAvailability = async (req, res) => {
       "https://apiv2.shiprocket.in/v1/external/courier/serviceability",
       {
         params: {
-          pickup_postcode: "500001", // your warehouse pincode
+          pickup_postcode: "501505", // your warehouse pincode
           delivery_postcode: pincode,
           weight: 0.5,
           cod: 1,

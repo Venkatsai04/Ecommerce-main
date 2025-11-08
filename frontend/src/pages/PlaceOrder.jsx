@@ -49,8 +49,6 @@ const PlaceOrder = () => {
   //   updateCartItem({});
   // };
 
-  
-
   const handlePlaceOrder = async () => {
     if (!token) return toast.error("Login to place an order");
     if (!validateForm()) return;
