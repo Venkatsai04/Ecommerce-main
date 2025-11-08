@@ -31,125 +31,120 @@ const Cart = () => {
   const subtotal = getCartAmount();
 
   return (
-    <div className="border-t pt-14 px-4 sm:px-10">
-      <div className="mb-6 text-2xl font-semibold text-gray-800">
+    <div className="border-t pt-14">
+      <div className="mb-3 text-2xl">
         <Title text1="YOUR" text2="CART" />
       </div>
 
       {isCartEmpty ? (
-        <div className="text-center py-20">
-          <img
-            src={assets.empty_cart}
-            alt="Empty Cart"
-            className="w-32 mx-auto mb-4 opacity-80"
-          />
-          <p className="text-lg text-gray-600 font-medium">
-            Your cart is empty ☹️
-          </p>
-          <button
-            onClick={() => navigate("/")}
-            className="mt-6 px-6 py-2 bg-black text-white text-sm rounded-md"
-          >
-            Continue Shopping
-          </button>
-        </div>
+        <p className="text-gray-500 text-lg">Your cart is empty ☹️</p>
       ) : (
-        <>
-          <div className="divide-y divide-gray-200">
-            {cartData.map((item, idx) => {
-              const product = products.find((p) => p._id === item._id);
-              if (!product) return null;
+        cartData.map((item, idx) => {
+          const product = products.find((p) => p._id === item._id);
+          if (!product) return null;
 
-              return (
-                <div
-                  key={idx}
-                  className="flex flex-col sm:flex-row justify-between items-center py-5"
-                >
-                  {/* Left section: image + info */}
-                  <div className="flex items-center gap-4 w-full sm:w-auto">
-                    <img
-                      className="w-20 h-20 object-cover rounded-md border"
-                      src={product.image?.[0] || assets.placeholder_img}
-                      alt={product.name}
-                    />
-                    <div className="flex flex-col">
-                      <p className="text-base sm:text-lg font-medium text-gray-800">
-                        {product.name}
-                      </p>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Size: <span className="font-medium">{item.size}</span>
-                      </p>
-                      <p className="mt-1 text-gray-700 font-medium">
-                        {currency} {product.price.toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Right section: quantity controls + remove */}
-                  <div className="flex items-center gap-4 mt-4 sm:mt-0">
-                    <div className="flex items-center border rounded-md">
-                      <button
-                        onClick={() =>
-                          updateCartItem(
-                            item._id,
-                            item.size,
-                            Math.max(item.quantity - 1, 1)
-                          )
-                        }
-                        className="px-3 py-1 text-lg font-bold border-r hover:bg-gray-100"
-                      >
-                        −
-                      </button>
-                      <span className="px-3 text-base font-medium text-gray-700">
-                        {item.quantity}
-                      </span>
-                      <button
-                        onClick={() =>
-                          updateCartItem(item._id, item.size, item.quantity + 1)
-                        }
-                        className="px-3 py-1 text-lg font-bold border-l hover:bg-gray-100"
-                      >
-                        +
-                      </button>
-                    </div>
-
-                    <img
-                      onClick={() => removeCartItem(item._id, item.size)}
-                      className="w-5 cursor-pointer hover:opacity-70 transition"
-                      src={assets.bin_icon}
-                      alt="Remove"
-                    />
-                  </div>
+          return (
+            <div
+              key={idx}
+              className="grid py-4 text-gray-700 border-t border-b sm:grid-cols-[4fr_2fr_0.5fr] gap-4 items-center"
+            >
+              <div className="flex items-start gap-6">
+                <img
+                  className="w-16 sm:w-20"
+                  src={product.image?.[0] || assets.placeholder_img}
+                  alt={product.name}
+                />
+                <div>
+                  <p className="text-sm sm:text-lg font-medium">{product.name}</p>
+                  <p className="mt-2 text-gray-600">
+                    {currency} {product.price}
+                  </p>
+                  <p className="inline-block px-2 border text-sm sm:px-3 sm:py-1 bg-slate-50 rounded mt-1">
+                    {item.size}
+                  </p>
                 </div>
-              );
-            })}
-          </div>
+              </div>
 
-          {/* Subtotal Section */}
-          <div className="flex flex-col items-end mt-10">
-            <div className="text-end">
-              <p className="text-lg sm:text-xl font-semibold text-gray-800">
-                Cart Value:{" "}
-                <span className="font-bold">
-                  {currency}{" "}
-                  {subtotal.toLocaleString(undefined, {
-                    minimumFractionDigits: 2,
-                  })}
-                </span>
-              </p>
-              <p className="text-sm text-gray-500 mt-1 italic">
-                * Shipping fee will be calculated at checkout
-              </p>
+              {/* ✅ Fixed Quantity Controls */}
+              <div className="flex items-center gap-3 justify-center">
+                <button
+                  onClick={() => {
+                    const newQty = item.quantity - 1;
+                    if (newQty >= 1) {
+                      updateCartItem(item._id, item.size, newQty);
+                    } else {
+                      removeCartItem(item._id, item.size);
+                    }
+                  }}
+                  className="px-3 py-1 border rounded hover:bg-gray-100 text-lg"
+                >
+                  −
+                </button>
 
-              <button
-                onClick={() => navigate("/place-order")}
-                className="px-8 py-3 mt-5 text-sm font-medium text-white bg-black hover:bg-gray-900 rounded-md transition"
-              >
-                PROCEED TO CHECKOUT
-              </button>
+                {/* ✅ Fixed: Handle empty input properly */}
+                <input
+                  type="number"
+                  min={1}
+                  value={item.quantity}
+                  onChange={(e) => {
+                    const inputValue = e.target.value.trim();
+                    
+                    // If empty, do nothing (user is still typing)
+                    if (inputValue === "") return;
+                    
+                    const value = Number(inputValue);
+                    
+                    // Only update if it's a valid positive number
+                    if (value >= 1) {
+                      updateCartItem(item._id, item.size, value);
+                    } else if (value === 0) {
+                      removeCartItem(item._id, item.size);
+                    }
+                    // Ignore negative numbers
+                  }}
+                  className="w-12 text-center border rounded text-lg"
+                />
+
+                <button
+                  onClick={() =>
+                    updateCartItem(item._id, item.size, item.quantity + 1)
+                  }
+                  className="px-3 py-1 border rounded hover:bg-gray-100 text-lg"
+                >
+                  +
+                </button>
+              </div>
+
+              <img
+                onClick={() => removeCartItem(item._id, item.size)}
+                className="w-5 cursor-pointer hover:opacity-70"
+                src={assets.bin_icon}
+                alt="Remove"
+              />
             </div>
+          );
+        })
+      )}
+
+      {/* Subtotal Section */}
+      {!isCartEmpty && (
+        <div className="flex justify-end my-10">
+          <div className="text-end">
+            <p className="text-lg font-medium">
+              Cart Value: {currency}{" "}
+              {subtotal.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+            </p>
+            <p className="text-sm text-gray-500 mt-1">
+              Shipping fee calculated at checkout
+            </p>
+            <button
+              onClick={() => navigate("/place-order")}
+              className="px-8 py-3 mt-4 text-sm text-white bg-black hover:bg-gray-800"
+            >
+              PROCEED TO CHECKOUT
+            </button>
           </div>
-        </>
+        </div>
       )}
     </div>
   );

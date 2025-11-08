@@ -79,30 +79,37 @@ const ShopContextProvider = (props) => {
     }
   };
 
-  // Update cart item to exact quantity
- const updateCartItem = async (productId, size, newQty) => {
+
+// Update cart item to exact quantity
+const updateCartItem = async (productId, size, newQty) => {
   if (!token) return toast.error("Login to manage cart");
 
   try {
     const currentQty = cartItems[productId]?.[size] || 0;
 
     if (newQty === 0) {
-      // DELETE route
+      // DELETE route - remove entire item
       await axios.post(
         `${backendUrl}/cart/remove`,
         { productId, size },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-    } else {
-      // ADD route (compute difference)
+    } else if (newQty > currentQty) {
+      // ADD route - increasing quantity
       const quantityDiff = newQty - currentQty;
-      if (quantityDiff > 0) {
-        await axios.post(
-          `${backendUrl}/cart/add`,
-          { productId, quantity: quantityDiff, size },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      }
+      await axios.post(
+        `${backendUrl}/cart/add`,
+        { productId, quantity: quantityDiff, size },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    } else if (newQty < currentQty) {
+      // REMOVE route - decreasing quantity
+      const quantityDiff = currentQty - newQty;
+      await axios.post(
+        `${backendUrl}/cart/remove`,
+        { productId, size, quantity: quantityDiff },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
     }
 
     // Update frontend state

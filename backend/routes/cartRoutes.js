@@ -50,18 +50,35 @@ router.get("/cart", verifyToken, async (req, res) => {
   }
 });
 
-// Remove item
+// Remove item (or reduce quantity)
 router.post("/cart/remove", verifyToken, async (req, res) => {
-  const { productId, size } = req.body;
+  const { productId, size, quantity } = req.body;
   const userId = req.user.id;
 
   try {
     const cart = await Cart.findOne({ userId });
     if (!cart) return res.status(404).json({ success: false, message: "Cart not found" });
 
-    cart.items = cart.items.filter(
-      (item) => !(item.productId.toString() === productId && item.size === size)
+    const itemIndex = cart.items.findIndex(
+      (item) => item.productId.toString() === productId && item.size === size
     );
+
+    if (itemIndex === -1) {
+      return res.status(404).json({ success: false, message: "Item not found in cart" });
+    }
+
+    // ✅ If quantity is provided, reduce by that amount
+    if (quantity && quantity > 0) {
+      cart.items[itemIndex].quantity -= quantity;
+      
+      // Remove item if quantity becomes 0 or less
+      if (cart.items[itemIndex].quantity <= 0) {
+        cart.items.splice(itemIndex, 1);
+      }
+    } else {
+      // Otherwise, remove the entire item
+      cart.items.splice(itemIndex, 1);
+    }
 
     await cart.save();
     res.json({ success: true, cart });

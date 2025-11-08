@@ -25,6 +25,16 @@ const CartTotal = ({ delivery_fee = 0 }) => {
       maximumFractionDigits: 2,
     });
 
+  // ✅ Fixed: Handle decrement properly
+  const handleDecrement = (pid, size, qty) => {
+    const newQty = qty - 1;
+    if (newQty >= 1) {
+      updateCartItem(pid, size, newQty);
+    } else {
+      removeCartItem(pid, size);
+    }
+  };
+
   return (
     <div className='w-full'>
       <div className='text-2xl'>
@@ -43,10 +53,25 @@ const CartTotal = ({ delivery_fee = 0 }) => {
                 <p className='text-sm text-gray-500'>{currency}{formatCurrency(product.price)}</p>
               </div>
               <div className='flex items-center gap-2'>
-                <button onClick={() => updateCartItem(pid, size, qty - 1)} className='px-2 border rounded'>-</button>
-                <span>{qty}</span>
-                <button onClick={() => updateCartItem(pid, size, qty + 1)} className='px-2 border rounded'>+</button>
-                <button onClick={() => removeCartItem(pid, size)} className='ml-2 text-red-500'>Remove</button>
+                <button 
+                  onClick={() => handleDecrement(pid, size, qty)} 
+                  className='px-2 border rounded hover:bg-gray-100'
+                >
+                  −
+                </button>
+                <span className='w-6 text-center'>{qty}</span>
+                <button 
+                  onClick={() => updateCartItem(pid, size, qty + 1)} 
+                  className='px-2 border rounded hover:bg-gray-100'
+                >
+                  +
+                </button>
+                <button 
+                  onClick={() => removeCartItem(pid, size)} 
+                  className='ml-2 text-red-500 hover:text-red-700'
+                >
+                  Remove
+                </button>
               </div>
             </div>
           ));
