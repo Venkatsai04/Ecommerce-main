@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import Title from '../components/Title';
@@ -20,6 +20,10 @@ const PlaceOrder = () => {
   } = useContext(ShopContext);
 
   const [method, setMethod] = useState('cod');
+  const [deliveryFee, setDeliveryFee] = useState(0);
+  const [deliveryInfo, setDeliveryInfo] = useState(null);
+  const [loading, setLoading] = useState(false);
+
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -44,14 +48,36 @@ const PlaceOrder = () => {
     return true;
   };
 
-  // const clearCart = () => {
-  //   localStorage.removeItem("cart");
-  //   updateCartItem({});
-  // };
+  // 🧠 Automatically check shipping fee when ZIP changes
+  useEffect(() => {
+    const checkShipping = async () => {
+      if (!form.zip || form.zip.length < 5) return;
+      setLoading(true);
+      try {
+        const res = await axios.post(`${backendUrl}/shipping/check-pincode`, { pincode: form.zip });
+        setDeliveryInfo(res.data);
+        if (res.data.available) {
+          setDeliveryFee(res.data.shipping_fee || 0);
+        } else {
+          setDeliveryFee(0);
+          toast.error(res.data.message || "Delivery not available to this pincode");
+        }
+      } catch (err) {
+        console.error(err);
+        setDeliveryFee(0);
+        toast.error("Error checking shipping fee");
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkShipping();
+  }, [form.zip]);
 
   const handlePlaceOrder = async () => {
     if (!token) return toast.error("Login to place an order");
     if (!validateForm()) return;
+    if (deliveryInfo && !deliveryInfo.available)
+      return toast.error("Delivery not available for this address");
 
     const items = [];
     Object.entries(cartItems).forEach(([pid, sizes]) => {
@@ -64,38 +90,31 @@ const PlaceOrder = () => {
           size,
           quantity: qty,
           price: product.price,
-          image: Array.isArray(product.image) ? product.image[0] : product.image, // ✅ pick first image
+          image: Array.isArray(product.image) ? product.image[0] : product.image,
         });
-
-
       });
     });
 
     if (items.length === 0) return toast.error("Cart is empty");
-    const totalAmount = getCartAmount();
+
+    const totalAmount = getCartAmount() + deliveryFee; // ✅ include shipping fee
 
     try {
       if (method === "cod") {
-        // COD order
         await axios.post(`${backendUrl}/order/place`,
-          { items, address: form, paymentMethod: "cod", totalAmount },
+          { items, address: form, paymentMethod: "cod", totalAmount, deliveryFee },
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
-        toast.success("Order placed successfully");
+        toast.success("Order placed successfully!");
         items.forEach(({ productId, size }) => removeCartItem(productId, size));
         navigate("/orders");
-
-
       } else if (method === "razorpay") {
-        // Create Razorpay order
         const { data } = await axios.post(
           `${backendUrl}/payment/razorpay/create-order`,
-          { amount: totalAmount * 100 }, // ✅ Razorpay expects paise
+          { amount: totalAmount * 100 },
           { headers: { Authorization: `Bearer ${token}` } }
         );
-
-
 
         const options = {
           key: "rzp_test_RU9gYhxqiyBnDV",
@@ -109,12 +128,7 @@ const PlaceOrder = () => {
             try {
               const verifyRes = await axios.post(
                 `${backendUrl}/payment/razorpay/verify`,
-                {
-                  ...response,   // includes razorpay_order_id, razorpay_payment_id, razorpay_signature
-                  items,
-                  address: form,
-                  totalAmount,
-                },
+                { ...response, items, address: form, totalAmount, deliveryFee },
                 { headers: { Authorization: `Bearer ${token}` } }
               );
 
@@ -130,8 +144,6 @@ const PlaceOrder = () => {
               toast.error("Something went wrong during payment verification");
             }
           },
-
-
           prefill: {
             name: form.firstName + " " + form.lastName,
             email: form.email,
@@ -143,7 +155,6 @@ const PlaceOrder = () => {
         const razor = new window.Razorpay(options);
         razor.open();
       }
-
     } catch (error) {
       console.error(error);
       toast.error("Something went wrong. Please try again.");
@@ -157,6 +168,7 @@ const PlaceOrder = () => {
 
   return (
     <div className='flex flex-col justify-between gap-4 pt-5 sm:flex-row sm:pt-14 min-h-[80vh] border-t'>
+      {/* LEFT: Form */}
       <div className='flex flex-col w-full gap-4 sm:max-w-[480px]'>
         <div className='my-3 text-xl sm:text-2xl'>
           <Title text1={'DELIVERY'} text2={'INFORMATION'} />
@@ -176,8 +188,17 @@ const PlaceOrder = () => {
           <input className='w-full px-4 py-2 border border-gray-300 rounded' type="text" name="country" value={form.country} onChange={handleInputChange} placeholder='Country' />
         </div>
         <input className='w-full px-4 py-2 border border-gray-300 rounded' type="number" name="mobile" value={form.mobile} onChange={handleInputChange} placeholder='Mobile' />
+
+        {/* delivery status */}
+        {loading && <p className='text-sm text-blue-500'>Checking delivery...</p>}
+        {deliveryInfo && (
+          <p className={`text-sm ${deliveryInfo.available ? "text-green-600" : "text-red-500"}`}>
+            {deliveryInfo.message || (deliveryInfo.available ? "Delivery available" : "Not deliverable")}
+          </p>
+        )}
       </div>
 
+      {/* RIGHT: Summary */}
       <div className='mt-8'>
         <div className='mt-8 min-w-80'>
           <CartTotal
@@ -186,8 +207,10 @@ const PlaceOrder = () => {
             currency={currency}
             updateCartItem={updateCartItem}
             removeItem={removeCartItem}
+            delivery_fee={deliveryFee} 
           />
         </div>
+
         <div className='mt-12'>
           <Title text1={'PAYMENT'} text2={'METHODS'} />
           <div className='flex flex-col gap-3 lg:flex-row'>
@@ -201,7 +224,11 @@ const PlaceOrder = () => {
             ))}
           </div>
           <div className='w-full mt-8 text-end'>
-            <button onClick={handlePlaceOrder} className='px-16 py-3 text-sm text-white bg-black active:bg-gray-800'>
+            <button
+              onClick={handlePlaceOrder}
+              disabled={deliveryInfo && !deliveryInfo.available}
+              className={`px-16 py-3 text-sm text-white ${deliveryInfo && !deliveryInfo.available ? "bg-gray-400 cursor-not-allowed" : "bg-black active:bg-gray-800"}`}
+            >
               PLACE ORDER
             </button>
           </div>

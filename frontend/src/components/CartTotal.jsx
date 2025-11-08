@@ -2,8 +2,11 @@ import React, { useContext } from 'react';
 import { ShopContext } from '../context/ShopContext';
 import Title from './Title';
 
-const CartTotal = () => {
-  const { currency, delivery_fee = 0, cartItems, products, updateCartItem, removeCartItem } = useContext(ShopContext);
+const CartTotal = ({delivery_fee}) => {
+  const { currency,  cartItems, products, updateCartItem, removeCartItem } = useContext(ShopContext);
+
+  console.log(delivery_fee);
+  
 
   const subtotal = Object.entries(cartItems).reduce((acc, [pid, sizes]) => {
     const product = products.find(p => p._id === pid);
