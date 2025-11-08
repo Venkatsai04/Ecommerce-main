@@ -224,8 +224,7 @@ const PlaceOrder = () => {
           <Title text1={"PAYMENT"} text2={"METHODS"} />
           <div className="flex flex-col gap-3 mt-3">
             {[
-              { key: "razorpay", label: "RazorPay", img: assets.razorpay_logo, offer: "Free Shipping 🎉" },
-              { key: "stripe", label: "Stripe", img: assets.stripe_logo, offer: "Free Shipping 🎉" },
+              { key: "razorpay", label: "RazorPay", img: assets.razorpay_logo, offer: "Free Shipping" },
               { key: "cod", label: "Cash on Delivery", img: null, offer: "₹30–₹40 Shipping Fee applies" },
             ].map(({ key, label, img, offer }) => (
               <div
