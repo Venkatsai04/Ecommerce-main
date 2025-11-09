@@ -124,6 +124,8 @@ const PlaceOrder = () => {
 
     try {
       if (method === "cod") {
+        console.log(items, form);
+        
         await axios.post(
           `${backendUrl}/order/place`,
           { items, address: form, paymentMethod: "cod", totalAmount, deliveryFee },
