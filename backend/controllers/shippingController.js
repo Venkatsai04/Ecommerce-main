@@ -67,7 +67,7 @@ export const checkPincodeAvailability = async (req, res) => {
           pickup_postcode: "501505", // your warehouse pincode
           delivery_postcode: pincode,
           weight: 0.5,
-          cod: 1,
+          cod: 0,
         },
         headers: { Authorization: `Bearer ${token}` },
       }
