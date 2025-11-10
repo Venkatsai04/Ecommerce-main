@@ -21,7 +21,7 @@ export const placeOrder = async (req, res) => {
     const payload = {
       order_id: `ORDER-${order._id.toString()}`,
       order_date: new Date().toISOString().slice(0, 19).replace("T", " "),
-      pickup_location: "Default",
+      pickup_location: "Home",
       billing_customer_name: address.firstName,
       billing_last_name: address.lastName,
       billing_address: address.street,
