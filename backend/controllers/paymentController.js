@@ -1,9 +1,11 @@
 import crypto from "crypto";
 import razorpayInstance from "../config/razorpay.js";
 import Order from "../models/orderModel.js";
+import { createShiprocketOrder } from "../utils/shiprocket.js";
 
+// ✅ Correct ESM export
 export const createRazorpayOrder = async (req, res) => {
-   try {
+  try {
     const { amount } = req.body;
     if (!amount || amount <= 0) {
       return res.status(400).json({ success: false, message: "Invalid amount" });
@@ -46,8 +48,8 @@ export const verifyRazorpayPayment = async (req, res) => {
     }
 
     // Step 2: Save Order
-    const newOrder = new Order({
-      userId: req.user.id,
+    const newOrder = await Order.create({
+      userId: req.user?.id || null,
       items: items.map((item) => ({
         productId: item._id || item.productId,
         name: item.name,
@@ -64,7 +66,38 @@ export const verifyRazorpayPayment = async (req, res) => {
       razorpayPaymentId: razorpay_payment_id,
     });
 
-    await newOrder.save();
+    console.log("✅ Razorpay order created:", newOrder._id);
+
+    // Optional: Shiprocket sync
+    createShiprocketOrder({
+      order_id: `ORDER-${newOrder._id}`,
+      order_date: new Date().toISOString().slice(0, 19).replace("T", " "),
+      pickup_location: "Default",
+      billing_customer_name: address.firstName,
+      billing_last_name: address.lastName,
+      billing_address: address.street,
+      billing_city: address.city,
+      billing_pincode: address.zip,
+      billing_state: address.state,
+      billing_country: address.country || "India",
+      billing_email: address.email,
+      billing_phone: address.mobile,
+      shipping_is_billing: true,
+      order_items: items.map((i) => ({
+        name: i.name,
+        sku: i.productId,
+        units: i.quantity,
+        selling_price: i.price,
+      })),
+      payment_method: "Prepaid",
+      sub_total: totalAmount,
+      length: 10,
+      breadth: 10,
+      height: 10,
+      weight: 1,
+    }).catch((err) =>
+      console.error("❌ Shiprocket sync failed:", err.response?.data || err.message)
+    );
 
     res.json({ success: true, order: newOrder });
   } catch (error) {

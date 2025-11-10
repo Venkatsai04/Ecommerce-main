@@ -1,9 +1,6 @@
 import express from "express";
+import { createRazorpayOrder, verifyRazorpayPayment } from "../controllers/paymentController.js";
 import { verifyToken } from "../middleware/auth.js";
-import {
-  createRazorpayOrder,
-  verifyRazorpayPayment,
-} from "../controllers/paymentController.js";
 
 const router = express.Router();
 
