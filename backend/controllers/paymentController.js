@@ -68,9 +68,10 @@ export const verifyRazorpayPayment = async (req, res) => {
 
     console.log("✅ Razorpay order created:", newOrder._id);
 
+
     // Optional: Shiprocket sync
     createShiprocketOrder({
-     order_id: `ORDER-${newOrder._id.toString()}`,
+      order_id: `ORDER-${newOrder._id.toString()}`,
       order_date: new Date().toISOString().slice(0, 19).replace("T", " "),
       pickup_location: "Default",
       billing_customer_name: address.firstName,
