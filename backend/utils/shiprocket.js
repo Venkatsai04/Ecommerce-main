@@ -1,5 +1,7 @@
 import axios from "axios";
 
+const SHIPROCKET_EMAIL = "your-shiprocket-api-email@example.com";
+const SHIPROCKET_PASSWORD = "your-shiprocket-password";
 
 let TOKEN_CACHE = null;
 let TOKEN_EXPIRE = 0;
@@ -16,6 +18,7 @@ export async function getShiprocketToken() {
 
   TOKEN_CACHE = res.data.token;
   TOKEN_EXPIRE = now + 1000 * 60 * 60 * 240; // 240 hours
+  console.log("✅ Shiprocket token refreshed");
   return TOKEN_CACHE;
 }
 
@@ -35,7 +38,7 @@ export async function createShiprocketOrder(order) {
         order.order_id ||
         (isMongoDoc ? `ORDER-${order._id.toString()}` : `ORDER-${Date.now()}`),
       order_date: new Date(order.createdAt || Date.now()).toISOString(),
-      pickup_location: order.pickup_location || "Primary",
+      pickup_location: order.pickup_location || "Home",
 
       billing_customer_name: address.firstName || order.billing_customer_name || "Unknown",
       billing_last_name: address.lastName || order.billing_last_name || "",
@@ -68,23 +71,37 @@ export async function createShiprocketOrder(order) {
 
     console.log("🚀 Shiprocket Payload:", JSON.stringify(payload, null, 2));
 
+    // 🧾 Step 1 – Create order
     const orderRes = await axios.post(
       "https://apiv2.shiprocket.in/v1/external/orders/create/adhoc",
       payload,
       { headers }
     );
-    console.log("✅ Shiprocket order created:", orderRes.data.shipment_id);
 
+    console.log("📦 Shiprocket create-order response:", JSON.stringify(orderRes.data, null, 2));
+
+    // ✅ Extract shipment ID correctly
+    const shipmentId = orderRes.data?.data?.shipment_id;
+
+    if (!shipmentId) {
+      console.error("❌ Failed to extract shipment_id from response:", orderRes.data);
+      return { success: false, message: "Shipment ID missing in Shiprocket response" };
+    }
+
+    console.log("✅ Shiprocket order created:", shipmentId);
+
+    // 🧾 Step 2 – Assign courier
     const courierRes = await axios.post(
       "https://apiv2.shiprocket.in/v1/external/courier/assign/awb",
-      { shipment_id: orderRes.data.shipment_id },
+      { shipment_id: shipmentId },
       { headers }
     );
     console.log("🚚 Courier assigned, AWB:", courierRes.data.awb_code);
 
+    // 🧾 Step 3 – Generate pickup
     await axios.post(
       "https://apiv2.shiprocket.in/v1/external/courier/generate/pickup",
-      { shipment_id: orderRes.data.shipment_id },
+      { shipment_id: shipmentId },
       { headers }
     );
     console.log("📦 Pickup scheduled successfully");
