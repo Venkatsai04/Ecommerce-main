@@ -70,7 +70,7 @@ export const verifyRazorpayPayment = async (req, res) => {
 
     // Optional: Shiprocket sync
     createShiprocketOrder({
-      order_id: `ORDER-${newOrder._id}`,
+     order_id: `ORDER-${newOrder._id.toString()}`,
       order_date: new Date().toISOString().slice(0, 19).replace("T", " "),
       pickup_location: "Default",
       billing_customer_name: address.firstName,
@@ -85,11 +85,15 @@ export const verifyRazorpayPayment = async (req, res) => {
       shipping_is_billing: true,
       order_items: items.map((i) => ({
         name: i.name,
-        sku: i.productId,
+        sku: i.productId?.toString?.() || i.productId,
         units: i.quantity,
         selling_price: i.price,
       })),
-      payment_method: "Prepaid",
+      // ✅ Dynamically set based on paymentMethod
+      payment_method:
+        newOrder.paymentMethod === "cod" || newOrder.paymentMethod === "COD"
+          ? "COD"
+          : "Prepaid",
       sub_total: totalAmount,
       length: 10,
       breadth: 10,
