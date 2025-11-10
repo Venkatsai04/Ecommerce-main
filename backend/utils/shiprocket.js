@@ -1,103 +1,97 @@
-// backend/utils/shiprocket.js
 import axios from "axios";
 
-const SHIPROCKET_EMAIL = "your-shiprocket-api-email@example.com";
-const SHIPROCKET_PASSWORD = "your-shiprocket-password";
 
 let TOKEN_CACHE = null;
 let TOKEN_EXPIRE = 0;
 
 // 🔹 Get or refresh Shiprocket auth token
 export async function getShiprocketToken() {
-    const now = Date.now();
-    if (TOKEN_CACHE && now < TOKEN_EXPIRE) return TOKEN_CACHE;
+  const now = Date.now();
+  if (TOKEN_CACHE && now < TOKEN_EXPIRE) return TOKEN_CACHE;
 
-    const res = await axios.post("https://apiv2.shiprocket.in/v1/external/auth/login", {
-        email: "venkatsai0434@gmail.com",
-        password: "107Cg4xwvB!qPN^H",
-    });
+  const res = await axios.post("https://apiv2.shiprocket.in/v1/external/auth/login", {
+    email: "venkatsai0434@gmail.com",
+    password: "107Cg4xwvB!qPN^H",
+  });
 
-    TOKEN_CACHE = res.data.token;
-    TOKEN_EXPIRE = now + 1000 * 60 * 60 * 240; // 240 hours
-    return TOKEN_CACHE;
+  TOKEN_CACHE = res.data.token;
+  TOKEN_EXPIRE = now + 1000 * 60 * 60 * 240; // 240 hours
+  return TOKEN_CACHE;
 }
 
 // 🔹 Create, assign, and schedule pickup
 export async function createShiprocketOrder(order) {
-    try {
-        const token = await getShiprocketToken();
-        const headers = { Authorization: `Bearer ${token}` };
+  try {
+    const token = await getShiprocketToken();
+    const headers = { Authorization: `Bearer ${token}` };
 
-        console.log(order);
-        
+    // ✅ Handle both Mongo order & clean payload
+    const isMongoDoc = typeof order._id !== "undefined";
+    const address = order.address || {};
+    const items = order.items || order.order_items || [];
 
-        const address = order.address || {};
+    const payload = {
+      order_id:
+        order.order_id ||
+        (isMongoDoc ? `ORDER-${order._id.toString()}` : `ORDER-${Date.now()}`),
+      order_date: new Date(order.createdAt || Date.now()).toISOString(),
+      pickup_location: order.pickup_location || "Primary",
 
-        const payload = {
-            order_id: order._id.toString(),
-            order_date: new Date(order.createdAt || Date.now()).toISOString(),
-            pickup_location: "Primary",
+      billing_customer_name: address.firstName || order.billing_customer_name || "Unknown",
+      billing_last_name: address.lastName || order.billing_last_name || "",
+      billing_address: address.street || order.billing_address || "Default Street",
+      billing_city: address.city || order.billing_city || "Hyderabad",
+      billing_pincode: address.zip || order.billing_pincode || "500001",
+      billing_state: address.state || order.billing_state || "Telangana",
+      billing_country: address.country || order.billing_country || "India",
+      billing_email: address.email || order.billing_email || "test@example.com",
+      billing_phone: address.mobile || order.billing_phone || "9999999999",
+      shipping_is_billing: true,
 
-            // ✅ Billing info (all required)
-            billing_customer_name: address.firstName || "Unknown",
-            billing_last_name: address.lastName || "",
-            billing_address: address.street || "Default Street",
-            billing_city: address.city || "Hyderabad",
-            billing_pincode: address.zip || "500001", // ✅ fixed: your frontend uses `zip`
-            billing_state: address.state || "Telangana",
-            billing_country: address.country || "India",
-            billing_email: address.email || "test@example.com",
-            billing_phone: address.mobile || "9999999999",
+      order_items: items.map((i) => ({
+        name: i.name || "Product",
+        sku: i.productId?.toString?.() || i.sku || "SKU-NA",
+        units: i.quantity || i.units || 1,
+        selling_price: i.price || i.selling_price || 0,
+      })),
 
-            shipping_is_billing: true,
+      payment_method:
+        order.payment_method ||
+        (order.paymentMethod?.toLowerCase?.() === "cod" ? "COD" : "Prepaid"),
 
-            order_items: order.items.map((i) => ({
-                name: i.name || "Product",
-                sku: i.productId,
-                units: i.quantity,
-                selling_price: i.price,
-            })),
+      sub_total: order.sub_total || order.totalAmount || 0,
+      length: 10,
+      breadth: 10,
+      height: 10,
+      weight: 0.5,
+    };
 
-            payment_method: order.paymentMethod === "cod" ? "COD" : "Prepaid",
-            sub_total: order.totalAmount || 0,
+    console.log("🚀 Shiprocket Payload:", JSON.stringify(payload, null, 2));
 
-            length: 10,
-            breadth: 10,
-            height: 10,
-            weight: 0.5,
-        };
+    const orderRes = await axios.post(
+      "https://apiv2.shiprocket.in/v1/external/orders/create/adhoc",
+      payload,
+      { headers }
+    );
+    console.log("✅ Shiprocket order created:", orderRes.data.shipment_id);
 
+    const courierRes = await axios.post(
+      "https://apiv2.shiprocket.in/v1/external/courier/assign/awb",
+      { shipment_id: orderRes.data.shipment_id },
+      { headers }
+    );
+    console.log("🚚 Courier assigned, AWB:", courierRes.data.awb_code);
 
-        // Step 1 – Create order
+    await axios.post(
+      "https://apiv2.shiprocket.in/v1/external/courier/generate/pickup",
+      { shipment_id: orderRes.data.shipment_id },
+      { headers }
+    );
+    console.log("📦 Pickup scheduled successfully");
 
-        console.log("🚀 Shiprocket Payload:", JSON.stringify(payload, null, 2));
-
-        const orderRes = await axios.post(
-            "https://apiv2.shiprocket.in/v1/external/orders/create/adhoc",
-            payload,
-            { headers }
-        );
-        console.log("✅ Shiprocket order created:", orderRes.data.shipment_id);
-
-        // Step 2 – Assign courier & AWB
-        const courierRes = await axios.post(
-            "https://apiv2.shiprocket.in/v1/external/courier/assign/awb",
-            { shipment_id: orderRes.data.shipment_id },
-            { headers }
-        );
-        console.log("🚚 Courier assigned, AWB:", courierRes.data.awb_code);
-
-        // Step 3 – Generate pickup
-        await axios.post(
-            "https://apiv2.shiprocket.in/v1/external/courier/generate/pickup",
-            { shipment_id: orderRes.data.shipment_id },
-            { headers }
-        );
-        console.log("📦 Pickup scheduled successfully");
-
-        return { success: true };
-    } catch (err) {
-        console.error("Shiprocket Error:", err.response?.data || err.message);
-        return { success: false, message: err.message };
-    }
+    return { success: true };
+  } catch (err) {
+    console.error("Shiprocket Error:", err.response?.data || err.message);
+    return { success: false, message: err.message };
+  }
 }

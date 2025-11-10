@@ -3,7 +3,6 @@ import razorpayInstance from "../config/razorpay.js";
 import Order from "../models/orderModel.js";
 import { createShiprocketOrder } from "../utils/shiprocket.js";
 
-// ✅ Correct ESM export
 export const createRazorpayOrder = async (req, res) => {
   try {
     const { amount } = req.body;
@@ -68,9 +67,8 @@ export const verifyRazorpayPayment = async (req, res) => {
 
     console.log("✅ Razorpay order created:", newOrder._id);
 
-
-    // Optional: Shiprocket sync
-    createShiprocketOrder({
+    // ✅ Build Shiprocket payload (identical to COD)
+    const payload = {
       order_id: `ORDER-${newOrder._id.toString()}`,
       order_date: new Date().toISOString().slice(0, 19).replace("T", " "),
       pickup_location: "Default",
@@ -90,17 +88,16 @@ export const verifyRazorpayPayment = async (req, res) => {
         units: i.quantity,
         selling_price: i.price,
       })),
-      // ✅ Dynamically set based on paymentMethod
-      payment_method:
-        newOrder.paymentMethod === "cod" || newOrder.paymentMethod === "COD"
-          ? "COD"
-          : "Prepaid",
+      payment_method: "Prepaid", // ✅ Razorpay always prepaid
       sub_total: totalAmount,
       length: 10,
       breadth: 10,
       height: 10,
       weight: 1,
-    }).catch((err) =>
+    };
+
+    // ✅ Send to Shiprocket
+    createShiprocketOrder(payload).catch((err) =>
       console.error("❌ Shiprocket sync failed:", err.response?.data || err.message)
     );
 

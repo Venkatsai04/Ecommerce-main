@@ -1,0 +1,28 @@
+export const buildShiprocketPayload = (order, address, items) => ({
+  order_id: `ORDER-${order._id.toString()}`,
+  order_date: new Date().toISOString().slice(0, 19).replace("T", " "),
+  pickup_location: "Primary",
+  billing_customer_name: address.firstName,
+  billing_last_name: address.lastName,
+  billing_address: address.street,
+  billing_city: address.city,
+  billing_pincode: address.zip,
+  billing_state: address.state,
+  billing_country: address.country || "India",
+  billing_email: address.email,
+  billing_phone: address.mobile,
+  shipping_is_billing: true,
+  order_items: items.map((i) => ({
+    name: i.name,
+    sku: i.productId?.toString?.() || i.productId,
+    units: i.quantity,
+    selling_price: i.price,
+  })),
+  payment_method:
+    order.paymentMethod?.toLowerCase() === "cod" ? "COD" : "Prepaid",
+  sub_total: order.totalAmount,
+  length: 10,
+  breadth: 10,
+  height: 10,
+  weight: 1,
+});
