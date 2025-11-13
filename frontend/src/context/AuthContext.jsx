@@ -3,32 +3,37 @@ import React, { createContext, useEffect, useState } from "react";
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(localStorage.getItem("token"));
+  const [token, setToken] = useState(localStorage.getItem("token") || null);
   const [user, setUser] = useState(
     JSON.parse(localStorage.getItem("user")) || null
   );
 
-  const login = (token, userData) => {
-    // Save token & user in localStorage
-    localStorage.setItem("token", token);
+  // 🔥 AUTO LOGIN FIX — restore token + user on refresh
+  useEffect(() => {
+    const savedToken = localStorage.getItem("token");
+    const savedUser = localStorage.getItem("user");
+
+    if (savedToken && !token) setToken(savedToken);
+    if (savedUser && !user) setUser(JSON.parse(savedUser));
+  }, []);
+
+  // LOGIN FUNCTION
+  const login = (tokenValue, userData) => {
+    localStorage.setItem("token", tokenValue);
     localStorage.setItem("user", JSON.stringify(userData));
 
-    setToken(token);
+    setToken(tokenValue);
     setUser(userData);
   };
 
+  // LOGOUT FUNCTION
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    localStorage.removeItem("cartItems");
+
     setToken(null);
     setUser(null);
-    window.location.href = "/login";
   };
-
-  useEffect(() => {
-    if (!token) setUser(null);
-  }, [token]);
 
   return (
     <AuthContext.Provider value={{ token, user, login, logout }}>
