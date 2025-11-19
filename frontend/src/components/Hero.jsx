@@ -5,44 +5,69 @@ import { ArrowRight, Camera, ScanLine, MoveRight } from "lucide-react";
 // --- Single Image Source ---
 const singleImage = "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?q=80&w=1600&auto=format&fit=crop";
 
-// --- Grid Slots (6 Items - Slant Triangle Layout) ---
+// --- Grid Slots (Diagonal Staircase Layout) ---
+// Designed to leave the top-left empty (as per the diagonal reference line)
 const gridSlots = [
-  // 1. The Tower (Left Anchor)
-  // Mobile: Top Left (2x2) | Desktop: Left Col (4x3) - Tallest
-  { id: 1, className: "col-span-2 md:col-span-4 row-span-2 md:row-span-3" }, 
+  // 1. The Peak (Far Right) - Tallest
+  // Desktop: Top Right Corner (Cols 11-12, Rows 1-3)
+  // Mobile: Top Right Corner (Col 4, Rows 1-3)
+  { 
+    id: 1, 
+    className: "lg:col-start-11 lg:col-span-2 lg:row-start-1 lg:row-span-3 col-start-4 col-span-1 row-start-1 row-span-3 z-10" 
+  }, 
 
-  // 2. The Step Down (Center Top)
-  // Mobile: Top Right (2x2) | Desktop: Center Col (4x2) - Medium
-  { id: 2, className: "col-span-2 md:col-span-4 row-span-2 md:row-span-2" }, 
+  // 2. The Step Down (Mid Right) - Medium
+  // Desktop: Next Left (Cols 8-10, Rows 2-3)
+  // Mobile: Next Left (Col 3, Rows 2-3)
+  { 
+    id: 2, 
+    className: "lg:col-start-8 lg:col-span-3 lg:row-start-2 lg:row-span-2 col-start-3 col-span-1 row-start-2 row-span-2 z-20" 
+  }, 
 
-  // 3. The Lowest Step (Right Top)
-  // Mobile: Middle Left (2x1) | Desktop: Right Col (4x1) - Shortest
-  { id: 3, className: "col-span-2 md:col-span-4 row-span-1 md:row-span-1" }, 
+  // 3. The Middle Block (Center) - Short
+  // Desktop: Center (Cols 5-7, Row 3)
+  // Mobile: Center Left (Col 2, Row 3)
+  { 
+    id: 3, 
+    className: "lg:col-start-5 lg:col-span-3 lg:row-start-3 lg:row-span-1 col-start-2 col-span-1 row-start-3 row-span-1 z-30" 
+  }, 
 
-  // 4. Right Middle Fill
-  // Mobile: Middle Right (2x1) | Desktop: Right Col (4x1)
-  { id: 4, className: "col-span-2 md:col-span-4 row-span-1 md:row-span-1" }, 
+  // 4. The Tiny Lead (Far Left of the diagonal)
+  // Desktop: Left Center (Cols 3-4, Row 3)
+  // Mobile: Far Left (Col 1, Row 3)
+  { 
+    id: 4, 
+    className: "lg:col-start-3 lg:col-span-2 lg:row-start-3 lg:row-span-1 col-start-1 col-span-1 row-start-3 row-span-1 z-30" 
+  }, 
 
-  // 5. Right Bottom Fill
-  // Mobile: Bottom Left (2x1) | Desktop: Right Col (4x1)
-  { id: 5, className: "col-span-2 md:col-span-4 row-span-1 md:row-span-1" }, 
+  // 5. Wide Base (Right)
+  // Desktop: Bottom Right (Cols 7-12, Row 4)
+  // Mobile: Bottom Right (Cols 3-4, Row 4)
+  { 
+    id: 5, 
+    className: "lg:col-start-7 lg:col-span-6 lg:row-start-4 lg:row-span-1 col-start-3 col-span-2 row-start-4 row-span-1 z-40" 
+  }, 
 
-  // 6. Center Bottom Fill
-  // Mobile: Bottom Right (2x1) | Desktop: Center Col (4x1) - Fills the gap under #2
-  { id: 6, className: "col-span-2 md:col-span-4 row-span-1 md:row-span-1" }, 
+  // 6. Wide Base (Left)
+  // Desktop: Bottom Left (Cols 1-6, Row 4)
+  // Mobile: Bottom Left (Cols 1-2, Row 4)
+  { 
+    id: 6, 
+    className: "lg:col-start-1 lg:col-span-6 lg:row-start-4 lg:row-span-1 col-start-1 col-span-2 row-start-4 row-span-1 z-40" 
+  }, 
 ];
 
 const GridItem = ({ className }) => {
   return (
     <div 
-      className={`relative overflow-hidden rounded-sm ${className} group transition-all duration-300 hover:scale-[1.005] border border-white/20`}
+      className={`relative overflow-hidden rounded-sm ${className} group transition-all duration-500 hover:z-50 hover:scale-105 border border-white/20 shadow-xl`}
       style={{
         backgroundImage: `url(${singleImage})`,
         backgroundSize: 'cover',
         backgroundPosition: 'top center', 
       }}
     >
-      <div className="absolute inset-0 bg-black/5 pointer-events-none" />
+      <div className="absolute inset-0 bg-black/10 pointer-events-none transition-colors duration-300 group-hover:bg-transparent" />
     </div>
   );
 };
@@ -73,7 +98,7 @@ const Hero = () => {
 
       <div className="absolute inset-0 pointer-events-none z-50 bg-noise opacity-30 mix-blend-multiply fixed" />
 
-      {/* --- Top Side: Content --- */}
+      {/* --- Top/Left Side: Content --- */}
       <div className="w-full h-[40%] lg:h-full lg:w-[40%] relative z-20 flex flex-col justify-center px-6 sm:px-16 lg:pl-24 lg:pr-4 pt-4 lg:pt-0 shrink-0">
         
         <div className="flex items-center gap-4 mb-2 lg:mb-8 overflow-hidden">
@@ -123,11 +148,15 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* --- Bottom Side: Slant Triangle Grid --- */}
+      {/* --- Bottom/Right Side: Diagonal "Staircase" Grid --- */}
       <div className="w-full h-[60%] lg:h-full lg:w-[60%] relative z-10 bg-white flex items-center justify-center overflow-hidden p-0">
          
-         {/* Grid Structure: 4 cols Mobile, 12 cols Desktop. 3 Rows on Desktop to create the steps. */}
-         <div className={`w-full h-full max-w-7xl grid grid-cols-4 md:grid-cols-12 grid-rows-4 lg:grid-rows-3 grid-flow-dense gap-0 ${loaded ? 'grid-entrance' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
+         {/* Grid Structure:
+            Desktop: 12 Columns x 4 Rows
+            Mobile: 4 Columns x 4 Rows
+            Effect: Climbing diagonal from bottom-left to top-right
+         */}
+         <div className={`w-full h-full max-w-6xl grid grid-cols-4 md:grid-cols-12 grid-rows-4 gap-1 ${loaded ? 'grid-entrance' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
             
             {gridSlots.map((slot) => (
               <GridItem 
@@ -136,11 +165,13 @@ const Hero = () => {
               />
             ))}
 
-            <div className="hidden lg:flex col-span-2 row-span-1 items-end justify-end p-2 opacity-20 col-start-11 row-start-3">
+            {/* Decor: Camera icon placed in empty top-left diagonal space if needed */}
+            <div className="hidden lg:flex col-span-2 row-span-1 items-end justify-end p-2 opacity-20 col-start-4 row-start-2">
                <Camera className="text-black/20 w-12 h-12" />
             </div>
          </div>
          
+         {/* Gradient overlays */}
          <div className="absolute inset-0 bg-gradient-to-r from-[#f4f4f5] via-transparent to-transparent z-20 pointer-events-none hidden lg:block" />
          <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-[#f4f4f5] to-transparent z-20 pointer-events-none lg:hidden" />
       </div>
