@@ -5,28 +5,31 @@ import { ArrowRight, Camera, ScanLine, MoveRight } from "lucide-react";
 // --- Single Image Source ---
 const singleImage = "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?q=80&w=1600&auto=format&fit=crop";
 
-// --- Grid Slots ---
-// Configured to look good on both the compressed mobile view and full desktop
+// --- Grid Slots (6 Items - Slant Triangle Layout) ---
 const gridSlots = [
-  // Row 1
-  { id: 1, className: "col-span-4 md:col-span-3 lg:col-span-3 row-span-2 lg:row-span-2" }, 
-  { id: 2, className: "col-span-2 md:col-span-2 lg:col-span-2 row-span-1" }, 
-  { id: 3, className: "col-span-2 md:col-span-3 lg:col-span-3 row-span-1 lg:row-span-1" }, 
-  { id: 4, className: "col-span-4 md:col-span-2 lg:col-span-4 row-span-1" }, 
+  // 1. The Tower (Left Anchor)
+  // Mobile: Top Left (2x2) | Desktop: Left Col (4x3) - Tallest
+  { id: 1, className: "col-span-2 md:col-span-4 row-span-2 md:row-span-3" }, 
 
-  // Row 2
-  { id: 5, className: "col-span-2 md:col-span-2 lg:col-span-2 row-span-1" }, 
-  { id: 6, className: "col-span-2 md:col-span-2 lg:col-span-2 row-span-2 lg:row-span-2" }, 
-  { id: 7, className: "col-span-4 md:col-span-4 lg:col-span-4 row-span-2 lg:row-span-3" }, 
+  // 2. The Step Down (Center Top)
+  // Mobile: Top Right (2x2) | Desktop: Center Col (4x2) - Medium
+  { id: 2, className: "col-span-2 md:col-span-4 row-span-2 md:row-span-2" }, 
 
-  // Row 3
-  { id: 8, className: "col-span-2 md:col-span-3 lg:col-span-3 row-span-2 lg:row-span-2" }, 
-  { id: 9, className: "col-span-2 md:col-span-2 lg:col-span-2 row-span-1" }, 
-  { id: 10, className: "col-span-4 md:col-span-3 lg:col-span-3 row-span-1 lg:row-span-1" }, 
+  // 3. The Lowest Step (Right Top)
+  // Mobile: Middle Left (2x1) | Desktop: Right Col (4x1) - Shortest
+  { id: 3, className: "col-span-2 md:col-span-4 row-span-1 md:row-span-1" }, 
 
-  // Row 4
-  { id: 11, className: "col-span-4 md:col-span-5 lg:col-span-5 row-span-1" }, 
-  { id: 12, className: "col-span-4 md:col-span-3 lg:col-span-4 row-span-1" }, 
+  // 4. Right Middle Fill
+  // Mobile: Middle Right (2x1) | Desktop: Right Col (4x1)
+  { id: 4, className: "col-span-2 md:col-span-4 row-span-1 md:row-span-1" }, 
+
+  // 5. Right Bottom Fill
+  // Mobile: Bottom Left (2x1) | Desktop: Right Col (4x1)
+  { id: 5, className: "col-span-2 md:col-span-4 row-span-1 md:row-span-1" }, 
+
+  // 6. Center Bottom Fill
+  // Mobile: Bottom Right (2x1) | Desktop: Center Col (4x1) - Fills the gap under #2
+  { id: 6, className: "col-span-2 md:col-span-4 row-span-1 md:row-span-1" }, 
 ];
 
 const GridItem = ({ className }) => {
@@ -36,7 +39,6 @@ const GridItem = ({ className }) => {
       style={{
         backgroundImage: `url(${singleImage})`,
         backgroundSize: 'cover',
-        // CHANGED: 'top center' ensures heads aren't cut off in short mobile slots
         backgroundPosition: 'top center', 
       }}
     >
@@ -53,7 +55,6 @@ const Hero = () => {
   }, []);
 
   return (
-    // CHANGED: h-screen and overflow-hidden ensure the whole thing fits in one view
     <section className="relative w-full h-screen bg-[#f4f4f5] text-[#1a1a1a] overflow-hidden flex flex-col lg:flex-row font-sans selection:bg-black selection:text-white">
       
       {/* --- Styles --- */}
@@ -72,8 +73,7 @@ const Hero = () => {
 
       <div className="absolute inset-0 pointer-events-none z-50 bg-noise opacity-30 mix-blend-multiply fixed" />
 
-      {/* --- Top Side: Content (Compressed for Mobile Viewport) --- */}
-      {/* CHANGED: h-[45%] on mobile so it takes less than half the screen */}
+      {/* --- Top Side: Content --- */}
       <div className="w-full h-[40%] lg:h-full lg:w-[40%] relative z-20 flex flex-col justify-center px-6 sm:px-16 lg:pl-24 lg:pr-4 pt-4 lg:pt-0 shrink-0">
         
         <div className="flex items-center gap-4 mb-2 lg:mb-8 overflow-hidden">
@@ -86,7 +86,6 @@ const Hero = () => {
            </div>
         </div>
 
-        {/* CHANGED: Typography sizes reduced for mobile (text-5xl -> text-4xl) */}
         <div className="flex flex-col gap-0 lg:gap-2 font-oswald uppercase leading-[0.9] tracking-tight mb-4 lg:mb-8">
            <div className="overflow-hidden">
              <h1 className={`text-4xl sm:text-7xl lg:text-[4.5rem] xl:text-[5.5rem] font-bold text-black ${loaded ? 'reveal-text' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
@@ -109,7 +108,6 @@ const Hero = () => {
           The future of fitting rooms is here. Upload your photo and let our AI tailor the new collection to your exact measurements.
         </p>
 
-        {/* Mobile-only shorter text to save space */}
         <p className={`font-manrope text-gray-600 text-xs max-w-xs leading-relaxed mb-4 sm:hidden ${loaded ? 'reveal-text' : 'opacity-0'}`} style={{ animationDelay: '0.8s' }}>
           Instant AI fitting room. Upload & see your look.
         </p>
@@ -125,11 +123,11 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* --- Bottom Side: Grid (Fills remaining viewport space) --- */}
-      {/* CHANGED: h-[60%] on mobile ensures it fills the bottom half exactly */}
+      {/* --- Bottom Side: Slant Triangle Grid --- */}
       <div className="w-full h-[60%] lg:h-full lg:w-[60%] relative z-10 bg-white flex items-center justify-center overflow-hidden p-0">
          
-         <div className={`w-full h-full max-w-7xl grid grid-cols-4 md:grid-cols-8 lg:grid-cols-12 grid-rows-6 lg:grid-rows-4 grid-flow-dense gap-0 ${loaded ? 'grid-entrance' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
+         {/* Grid Structure: 4 cols Mobile, 12 cols Desktop. 3 Rows on Desktop to create the steps. */}
+         <div className={`w-full h-full max-w-7xl grid grid-cols-4 md:grid-cols-12 grid-rows-4 lg:grid-rows-3 grid-flow-dense gap-0 ${loaded ? 'grid-entrance' : 'opacity-0'}`} style={{ animationDelay: '0.4s' }}>
             
             {gridSlots.map((slot) => (
               <GridItem 
@@ -138,13 +136,11 @@ const Hero = () => {
               />
             ))}
 
-            {/* Decor */}
-            <div className="hidden lg:flex col-span-2 row-span-1 items-end justify-end p-2 opacity-20 col-start-11 row-start-4">
+            <div className="hidden lg:flex col-span-2 row-span-1 items-end justify-end p-2 opacity-20 col-start-11 row-start-3">
                <Camera className="text-black/20 w-12 h-12" />
             </div>
          </div>
          
-         {/* Vignette for blend */}
          <div className="absolute inset-0 bg-gradient-to-r from-[#f4f4f5] via-transparent to-transparent z-20 pointer-events-none hidden lg:block" />
          <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-[#f4f4f5] to-transparent z-20 pointer-events-none lg:hidden" />
       </div>
