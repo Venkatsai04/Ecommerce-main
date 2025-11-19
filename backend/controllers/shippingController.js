@@ -156,6 +156,6 @@ export const trackAwb =   async (req, res) => {
   }
 };
 
-export default router;
+
 
 
