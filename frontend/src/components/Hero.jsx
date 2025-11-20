@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 // import { Link } from "react-router-dom"; 
 import { ArrowRight, ScanLine, MoveRight, Sparkles } from "lucide-react";
 
-// --- Curated Images for the 3D Cylinder (Doubled for Size) ---
+// --- Curated Images for the 3D Cylinder (Doubled for Size) 
 const baseImages = [
   "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?q=80&w=600&auto=format&fit=crop",
   "https://images.unsplash.com/photo-1617137968427-85924c809a10?q=80&w=600&auto=format&fit=crop",
