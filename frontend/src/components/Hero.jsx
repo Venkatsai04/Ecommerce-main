@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 // import { Link } from "react-router-dom"; 
 import { ArrowRight, ScanLine, MoveRight, Sparkles } from "lucide-react";
 
-// --- Curated Images for the 3D Cylinder (Doubled for Size) 
+// --- Curated Images for the 3D Cylinder (Doubled for Size) ---
 const baseImages = [
   "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?q=80&w=600&auto=format&fit=crop",
   "https://images.unsplash.com/photo-1617137968427-85924c809a10?q=80&w=600&auto=format&fit=crop",
@@ -19,6 +19,8 @@ const cylinderImages = [...baseImages, ...baseImages];
 const Cylinder3D = () => {
   const cardCount = cylinderImages.length;
   const cardWidth = 132; 
+  const cardHeight = 280; // Increased height
+  // Recalculate radius for new dimensions, keeping the same width
   const radius = Math.round((cardWidth / 2) / Math.tan(Math.PI / cardCount)) + 10; 
 
   return (
@@ -27,13 +29,15 @@ const Cylinder3D = () => {
       <div className="relative preserve-3d animate-boost">
         {/* LAYER 2: The Steady Flow */}
         <div className="relative preserve-3d animate-flow cursor-grab active:cursor-grabbing">
-          <div className="relative preserve-3d" style={{ width: cardWidth, height: 198 }}> 
+          {/* Updated height */}
+          <div className="relative preserve-3d" style={{ width: cardWidth, height: cardHeight }}> 
             {cylinderImages.map((src, i) => {
               const angle = (i / cardCount) * 360;
               return (
                 <div
                   key={i}
-                  className="absolute top-0 left-0 w-full h-full rounded-xl overflow-hidden border-2 border-white/20 shadow-2xl bg-gray-900 backface-visible"
+                  // Removed bg-gray-900 and border-2 for a cleaner "floating image" look
+                  className="absolute top-0 left-0 w-full h-full rounded-xl overflow-hidden shadow-2xl backface-visible"
                   style={{
                     transform: `rotateY(${angle}deg) translateZ(${radius}px)`,
                   }}
@@ -80,7 +84,8 @@ const Hero = () => {
           .backface-visible { backface-visibility: hidden; }
           
           @keyframes boostRotate { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(-720deg); } }
-          .animate-boost { animation: boostRotate 3s cubic-bezier(0.1, 0.6, 0.2, 1) forwards; }
+          /* Increased duration from 3s to 5s */
+          .animate-boost { animation: boostRotate 5s cubic-bezier(0.1, 0.6, 0.2, 1) forwards; }
 
           @keyframes flowRotate { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(-360deg); } }
           .animate-flow { animation: flowRotate 30s linear infinite; }
@@ -127,7 +132,8 @@ const Hero = () => {
                </h1>
              </div>
              <div className="overflow-hidden flex items-baseline gap-2 lg:gap-4">
-               <h1 className={`text-5xl sm:text-6xl lg:text-[5rem] xl:text-[6rem] text-gray-300 font-bold ${introComplete ? 'reveal-text' : 'opacity-0'}`} style={{ animationDelay: '0.8s' }}>
+               {/* Added Gemini-style Gradient */}
+               <h1 className={`text-5xl sm:text-6xl lg:text-[5rem] xl:text-[6rem] font-bold bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 bg-clip-text text-transparent ${introComplete ? 'reveal-text' : 'opacity-0'}`} style={{ animationDelay: '0.8s' }}>
                  Try-On
                </h1>
              </div>
@@ -157,7 +163,8 @@ const Hero = () => {
       {/* --- Right Side: The 3D Cylinder Animation --- */}
       <div 
         className={`
-          relative z-10 bg-black flex items-center justify-center overflow-visible
+          /* Changed bg-black to bg-[#f4f4f5] to match the left side */
+          relative z-10 bg-[#f4f4f5] flex items-center justify-center overflow-visible
           transition-all duration-[1500ms] cubic-bezier(0.22, 1, 0.36, 1)
           /* RESPONSIVE TRANSITION:
              - Mobile: Animates HEIGHT (100% -> 60%)
@@ -168,7 +175,7 @@ const Hero = () => {
             : "h-full w-full lg:h-full lg:w-full"}
         `}
       >
-         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-gray-900 via-black to-black" />
+         {/* Removed the radial gradient background */}
          
          <div 
             className={`
