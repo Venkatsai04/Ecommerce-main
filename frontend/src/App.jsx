@@ -19,6 +19,7 @@ import PrivacyPolicy from './pages/Policy'
 import ScrollToTop from './components/ScrollToTop'
 import Profile from './pages/Profile'
 import PaymentSuccess from './pages/PaymentSucces'
+import TryOn from './pages/TryOn'
 
 const App = () => {
   return (
@@ -41,6 +42,7 @@ const App = () => {
         <Route path='/privacy-policy' element={<PrivacyPolicy />} />
         <Route path='/Profile' element={<Profile/>} />
          <Route path="/payment-success" element={<PaymentSuccess />} />
+         <Route path="/try" element={<TryOn/>} />
       </Routes>
       <Footer />
     </div>
