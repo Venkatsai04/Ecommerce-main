@@ -93,7 +93,20 @@ const Cylinder3D = () => {
   const RADIUS = (PANEL_WIDTH / 2) / Math.tan(Math.PI / COUNT) + 15; 
 
   return (
-    <div className="perspective-container w-full h-full flex items-center justify-center relative select-none cursor-grab active:cursor-grabbing">
+    // UPDATED: Changed div to motion.div and moved pan/touch handlers here
+    // touchAction: "pan-y" allows vertical scroll but captures horizontal swipes for rotation
+    <motion.div 
+      className="perspective-container w-full h-full flex items-center justify-center relative select-none cursor-grab active:cursor-grabbing"
+      style={{ touchAction: "pan-y" }} 
+      onPan={(e, info) => {
+         const current = rotation.get();
+         rotation.set(current + info.delta.x * DRAG_FACTOR);
+      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onTouchStart={() => setIsHovered(true)}
+      onTouchEnd={() => setIsHovered(false)}
+    >
       <style>{`
         .perspective-container {
           perspective: 2000px;
@@ -108,12 +121,6 @@ const Cylinder3D = () => {
         animate={{ rotateX: 0, scale: 1, opacity: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.2 }} 
         className="cylinder-stage w-0 h-0 relative"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        onPan={(e, info) => {
-           const current = rotation.get();
-           rotation.set(current + info.delta.x * DRAG_FACTOR);
-        }}
       >
         <motion.div 
             className="cylinder-ring absolute inset-0"
@@ -166,13 +173,22 @@ const Cylinder3D = () => {
       <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white via-white/80 to-transparent pointer-events-none z-10" />
       <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none z-10" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,white_100%)] pointer-events-none z-10 opacity-60" />
-    </div>
+    </motion.div>
   );
 };
 
 // --- MAIN HERO COMPONENT ---
 const CinematicHero = () => {
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check for mobile to adjust the "Move Up" animation distance
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   if (loading) return <Preloader onComplete={() => setLoading(false)} />;
 
@@ -185,24 +201,35 @@ const CinematicHero = () => {
       `}</style>
 
       {/* --- 3D SCENE BACKGROUND --- */}
-      <div className="absolute inset-0 z-0 flex items-center justify-center">
-          {/* MOBILE SCALE INCREASED */}
-          <div className="w-full h-full scale-[0.85] sm:scale-[0.7] md:scale-[0.85] lg:scale-100 transition-transform duration-1000">
+      {/* WRAPPER ANIMATION: 
+         1. Starts centered (y: 0).
+         2. Delays for 2.2s (waiting for text reveal).
+         3. Moves UP (y: -15% on mobile, -5% desktop) to make room for text.
+      */}
+      <motion.div 
+          className="absolute inset-0 z-0 flex items-center justify-center"
+          initial={{ y: 0 }}
+          animate={{ y: isMobile ? "-15%" : "-5%" }} 
+          transition={{ delay: 2.2, duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+      >
+          {/* MOBILE SCALE: Keeps it large enough to be immersive */}
+          <div className="w-full h-full scale-[1.2] sm:scale-[0.7] md:scale-[0.85] lg:scale-100 transition-transform duration-1000">
             <Cylinder3D />
           </div>
-      </div>
+      </motion.div>
 
       {/* --- UI OVERLAY --- */}
-      <div className="absolute inset-0 z-20 pointer-events-none flex flex-col justify-end p-6 sm:p-12 md:p-16">
+      <div className="absolute inset-0 z-20 pointer-events-none flex flex-col justify-end p-6 pb-8 sm:p-12 md:p-16">
         
         {/* Center Title */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full z-30">
+        {/* UPDATED: Added pointer-events-none so touches pass through to cylinder */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full z-30 pointer-events-none">
             <div className="overflow-hidden">
                 <motion.h1 
                     initial={{ y: "150%" }}
                     animate={{ y: 0 }}
                     transition={{ delay: 1.5, duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                    className="font-oswald text-[12vw] sm:text-[9vw] lg:text-[7vw] font-bold uppercase text-black tracking-tighter leading-[0.85]"
+                    className="font-oswald text-[16vw] sm:text-[9vw] lg:text-[7vw] font-bold uppercase text-black tracking-tighter leading-[0.85]"
                 >
                     Immersive
                 </motion.h1>
@@ -212,7 +239,7 @@ const CinematicHero = () => {
                     initial={{ y: "150%" }}
                     animate={{ y: 0 }}
                     transition={{ delay: 1.7, duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                    className="font-oswald text-[12vw] sm:text-[9vw] lg:text-[7vw] font-light uppercase text-gray-500 tracking-tighter leading-[0.85]"
+                    className="font-oswald text-[13vw] sm:text-[9vw] lg:text-[7vw] font-light uppercase text-gray-500 tracking-tighter leading-[0.85]"
                 >
                     Reality
                 </motion.h1>
@@ -224,18 +251,20 @@ const CinematicHero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 2.2, duration: 1 }}
-            className="flex flex-col sm:flex-row items-end sm:items-center justify-between gap-6 pointer-events-auto"
+            className="flex flex-col sm:flex-row items-end sm:items-center justify-between gap-6 pointer-events-auto w-full mb-[80px]"
         >
-            <div className="flex items-center gap-4">
-                <button className="w-10 h-10 sm:w-12 sm:h-12 border border-black/20 rounded-full flex items-center justify-center hover:bg-black hover:text-white transition-all duration-300">
-                    <Play className="w-3 h-3 sm:w-4 sm:h-4 fill-current ml-0.5 text-black hover:text-white transition-colors" />
+            {/* Play Button Group */}
+            <div className="flex items-center gap-4 ">
+                <button className="w-12 h-12 border border-black/20 rounded-full flex items-center justify-center hover:bg-black hover:text-white transition-all duration-300 shadow-sm bg-white/50 backdrop-blur-sm">
+                    <Play className="w-4 h-4 fill-current ml-0.5 text-black hover:text-white transition-colors" />
                 </button>
                 <p className="hidden sm:block max-w-[200px] text-[10px] text-gray-600 font-manrope leading-relaxed uppercase tracking-wide">
                     Drag to explore the <br/> Fall / Winter 2025 Archive
                 </p>
             </div>
 
-            <button className="group relative px-6 py-3 sm:px-8 sm:py-4 bg-black text-white font-manrope text-[10px] sm:text-xs font-bold uppercase tracking-widest overflow-hidden">
+            {/* Enter Gallery Button */}
+            <button className="group relative px-6 py-4 bg-black text-white font-manrope text-[10px] sm:text-xs font-bold uppercase tracking-widest overflow-hidden shadow-lg">
                 <span className="relative z-10 flex items-center gap-2 group-hover:gap-4 transition-all duration-300">
                     Enter Gallery <MoveRight size={14} />
                 </span>

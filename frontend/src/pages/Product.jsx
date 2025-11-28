@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; // Added useNavigate
 import axios from "axios";
 import { ShopContext } from "../context/ShopContext";
 import { AuthContext } from "../context/AuthContext";
@@ -8,6 +8,7 @@ import RelatedProducts from "../components/RelatedProducts";
 
 const Product = () => {
   const { productId } = useParams();
+  const navigate = useNavigate(); // Initialize Navigation Hook
   const { products, currency, addToCart } = useContext(ShopContext);
   const { user } = useContext(AuthContext);
 
@@ -87,6 +88,25 @@ const Product = () => {
     }
   };
 
+  // --- NEW: Handle Try On Navigation ---
+  const handleTryOn = () => {
+    if (!productData) return;
+
+    // Navigate to TryOn page with the current product data
+    navigate('/try-on', { 
+      state: { 
+        product: {
+          id: productData._id,
+          name: productData.name,
+          price: productData.price,
+          image: image, // Uses the currently selected image from state
+          description: productData.description,
+          category: productData.category
+        }
+      } 
+    });
+  };
+
   if (!productData) return <div className="opacity-0"></div>;
 
   return (
@@ -135,15 +155,28 @@ const Product = () => {
             </div>
           </div>
 
-          <button
-            onClick={() => {
-              if (!size) return alert("Please select a size");
-              addToCart(productData._id, size);
-            }}
-            className="px-8 py-3 text-sm text-white bg-black active:bg-gray-700"
-          >
-            ADD TO CART
-          </button>
+          {/* --- ACTION BUTTONS --- */}
+          <div className="flex gap-4 items-center">
+            {/* Add to Cart */}
+            <button
+                onClick={() => {
+                if (!size) return alert("Please select a size");
+                addToCart(productData._id, size);
+                }}
+                className="px-8 py-3 text-sm text-white bg-black active:bg-gray-700"
+            >
+                ADD TO CART
+            </button>
+
+            {/* NEW: Virtual Try On Button */}
+            <button 
+                onClick={handleTryOn}
+                className="px-8 py-3 text-sm text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 shadow-md transition-all flex items-center gap-2"
+            >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                TRY ON
+            </button>
+          </div>
 
 
           {/* --- Delivery Check Section --- */}
