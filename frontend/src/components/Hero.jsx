@@ -1,284 +1,253 @@
 import React, { useEffect, useState, useRef } from "react";
-import { MoveRight, Zap, Play } from "lucide-react";
+import { motion, useSpring, useMotionValue, useAnimationFrame } from "framer-motion";
+import { MoveRight, Play } from "lucide-react";
 
-// --- DATA: High-Res Fashion Imagery ---
+// --- CONFIGURATION ---
+const INITIAL_CYLINDER_SPEED = 3.5; 
+const FINAL_CYLINDER_SPEED = 0.05;  
+const DRAG_FACTOR = 0.2;            
+
+// High-Res Fashion Imagery
 const BASE_IMAGES = [
-  { src: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=800&auto=format&fit=crop", label: "Avant Garde" },
-  { src: "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=800&auto=format&fit=crop", label: "Neo Tokyo" },
-  { src: "https://images.unsplash.com/photo-1617137968427-85924c809a10?q=80&w=800&auto=format&fit=crop", label: "Structure" },
-  { src: "https://images.unsplash.com/photo-1529139574466-a302d2d3f524?q=80&w=800&auto=format&fit=crop", label: "Ethereal" },
-  { src: "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?q=80&w=800&auto=format&fit=crop", label: "Classic" },
-  { src: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=800&auto=format&fit=crop", label: "Portrait" },
+  { src: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=600&auto=format&fit=crop", label: "Avant Garde" },
+  { src: "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=600&auto=format&fit=crop", label: "Neo Tokyo" },
+  { src: "https://images.unsplash.com/photo-1617137968427-85924c809a10?q=80&w=600&auto=format&fit=crop", label: "Structure" },
+  { src: "https://images.unsplash.com/photo-1529139574466-a302d2d3f524?q=80&w=600&auto=format&fit=crop", label: "Ethereal" },
+  { src: "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?q=80&w=600&auto=format&fit=crop", label: "Classic" },
+  { src: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=600&auto=format&fit=crop", label: "Portrait" },
+  { src: "https://images.unsplash.com/photo-1581044777550-4cfa60707c03?q=80&w=600&auto=format&fit=crop", label: "Fashion" },
+  { src: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=600&auto=format&fit=crop", label: "Couture" },
 ];
 
-// Triple the array to create a dense, seamless ring (18 panels)
-const CYLINDER_ITEMS = [...BASE_IMAGES, ...BASE_IMAGES, ...BASE_IMAGES].map((item, i) => ({
-  ...item,
-  id: `panel-${i}`
-}));
+const ITEMS = [...BASE_IMAGES, ...BASE_IMAGES, ...BASE_IMAGES]; 
 
-// --- COMPONENT: The Cinematic Cylinder ---
-const CinematicCylinder = ({ mode }) => {
-  // REDUCED DIMENSIONS FOR SLEEKER LOOK
-  const PANEL_WIDTH = 140; // Reduced from 200
-  const PANEL_HEIGHT = 200; // Reduced from 280
-  
-  const PANEL_COUNT = CYLINDER_ITEMS.length;
-  // Exact Math for a perfect circle with no gaps
-  const RADIUS = (PANEL_WIDTH / 2) / Math.tan(Math.PI / PANEL_COUNT) + 10; 
+// --- COMPONENT: PRELOADER (White Theme) ---
+const Preloader = ({ onComplete }) => {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    let loadedCount = 0;
+    const total = ITEMS.length;
+    
+    if (total === 0) {
+      onComplete();
+      return;
+    }
+
+    const checkComplete = () => {
+      loadedCount++;
+      const percent = Math.round((loadedCount / total) * 100);
+      setProgress(percent);
+      if (loadedCount >= total) {
+        setTimeout(onComplete, 800); 
+      }
+    };
+
+    ITEMS.forEach((item) => {
+      const img = new Image();
+      img.src = item.src;
+      img.onload = checkComplete;
+      img.onerror = checkComplete;
+    });
+  }, [onComplete]);
 
   return (
-    <div className={`cylinder-wrapper relative w-full h-full flex items-center justify-center`}>
-      <style>{`
-        .cylinder-wrapper {
-          perspective: 1000px;
-          perspective-origin: 50% 50%;
-        }
-
-        .cylinder-rig {
-          transform-style: preserve-3d;
-          transition: transform 1.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        /* INTRO STATE: Tilted, spinning fast */
-        .rig-intro {
-          animation: spin-intro 2s infinite linear; 
-          transform: rotateX(10deg) rotateZ(-5deg) scale(0.9);
-        }
-
-        /* DOCKED STATE: Straight, spinning slow */
-        .rig-docked {
-          animation: spin-infinite 40s infinite linear;
-          transform: rotateX(0deg) rotateZ(0deg) scale(1);
-        }
-
-        .blur-motion {
-          filter: blur(2px);
-        }
-
-        .panel {
-          position: absolute;
-          left: 50%;
-          top: 50%;
-          backface-visibility: hidden; 
-          -webkit-backface-visibility: hidden;
-        }
-
-        @keyframes spin-intro {
-          0% { transform: rotateX(10deg) rotateZ(-5deg) rotateY(0deg); }
-          100% { transform: rotateX(10deg) rotateZ(-5deg) rotateY(-360deg); }
-        }
-
-        @keyframes spin-infinite {
-          0% { transform: rotateY(0deg); }
-          100% { transform: rotateY(-360deg); }
-        }
-      `}</style>
-
-      {/* The Rotating Rig */}
-      <div 
-        className={`cylinder-rig w-0 h-0 ${mode === 'intro' ? 'rig-intro' : 'rig-docked'}`}
-      >
-        {CYLINDER_ITEMS.map((item, i) => {
-          const angle = (i / PANEL_COUNT) * 360;
-          
-          return (
-            <div
-              key={item.id}
-              className={`panel transition-all duration-700 ${mode === 'intro' ? 'blur-motion opacity-80' : 'opacity-100'}`}
-              style={{
-                width: `${PANEL_WIDTH}px`,
-                height: `${PANEL_HEIGHT}px`,
-                marginTop: `-${PANEL_HEIGHT / 2}px`, // Center vertically
-                marginLeft: `-${PANEL_WIDTH / 2}px`, // Center horizontally
-                transform: `rotateY(${angle}deg) translateZ(${RADIUS}px)`,
-              }}
-            >
-              <div className="w-full h-full relative overflow-hidden rounded-sm border-x border-black/20 bg-black">
-                <img 
-                  src={item.src} 
-                  alt="" 
-                  className="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity duration-300"
-                />
-                <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none mix-blend-overlay" />
-                <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/80 to-transparent" />
-                
-                {mode !== 'intro' && (
-                  <span className="absolute bottom-4 left-0 right-0 text-center text-[9px] text-white/60 font-mono uppercase tracking-widest">
-                    {item.label}
-                  </span>
-                )}
-              </div>
-            </div>
-          );
-        })}
+    <div className="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center text-black">
+      <div className="text-6xl sm:text-8xl font-oswald font-bold tracking-tighter animate-pulse">
+        {progress}%
       </div>
-      
-      {/* Vignette Overlay */}
-      <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_30%,#f4f4f5_90%)]" />
+      <div className="mt-8 w-48 sm:w-64 h-[2px] bg-black/10 rounded-full overflow-hidden">
+        <div 
+          className="h-full bg-black transition-all duration-300 ease-out"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+      <p className="mt-4 font-manrope text-[10px] uppercase tracking-[0.3em] text-gray-500">Loading Experience</p>
     </div>
   );
 };
 
-// --- COMPONENT: Main Page ---
-const Hero = () => {
-  const [viewState, setViewState] = useState('intro'); // 'intro' | 'docked'
-  const [contentVisible, setContentVisible] = useState(false);
+// --- COMPONENT: 3D CYLINDER ---
+const Cylinder3D = () => {
+  const [isHovered, setIsHovered] = useState(false);
+  const currentSpeed = useRef(INITIAL_CYLINDER_SPEED);
+  const rotation = useMotionValue(0);
+  const smoothRotation = useSpring(rotation, { damping: 20, stiffness: 100 });
+  
+  useAnimationFrame((time, delta) => {
+    if (!isHovered) {
+      if (currentSpeed.current > FINAL_CYLINDER_SPEED) {
+        currentSpeed.current = currentSpeed.current * 0.98;
+      }
+      if (currentSpeed.current < FINAL_CYLINDER_SPEED) {
+        currentSpeed.current = FINAL_CYLINDER_SPEED;
+      }
+      const current = rotation.get();
+      rotation.set(current - (currentSpeed.current * (delta / 16))); 
+    }
+  });
 
-  useEffect(() => {
-    // 1. Initial High-Speed Spin (Intro)
-    // 2. Transition to Docked state
-    const timer1 = setTimeout(() => {
-      setViewState('docked');
-    }, 1800);
-
-    // 3. Reveal Text Content (synced with dock)
-    const timer2 = setTimeout(() => {
-      setContentVisible(true);
-    }, 2000);
-
-    return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-    };
-  }, []);
+  const PANEL_WIDTH = 200; 
+  const PANEL_HEIGHT = 300; 
+  const COUNT = ITEMS.length;
+  const RADIUS = (PANEL_WIDTH / 2) / Math.tan(Math.PI / COUNT) + 15; 
 
   return (
-    <section className="relative w-full h-screen bg-[#f4f4f5] text-[#1a1a1a] overflow-hidden font-sans selection:bg-black selection:text-white">
-      
-      {/* Global Styles */}
+    <div className="perspective-container w-full h-full flex items-center justify-center relative select-none cursor-grab active:cursor-grabbing">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600&family=Oswald:wght@400;500;700&display=swap');
-        .font-oswald { font-family: 'Oswald', sans-serif; }
-        .font-manrope { font-family: 'Manrope', sans-serif; }
-        
-        .reveal-char {
-          animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          opacity: 0;
-          transform: translateY(100%);
+        .perspective-container {
+          perspective: 2000px;
         }
-        @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
-
-        /* Layout Transition Container */
-        .stage-container {
-          transition: all 1.5s cubic-bezier(0.65, 0, 0.35, 1);
-        }
-        
-        /* Intro: Centered and larger */
-        .stage-intro {
-          left: 50%;
-          width: 100vw;
-          transform: translateX(-50%) scale(1);
-        }
-        
-        /* Docked: Right side */
-        .stage-docked {
-          left: 100%; 
-          width: 55vw; 
-          transform: translateX(-100%) scale(1);
-        }
-
-        /* --- MOBILE RESPONSIVENESS --- */
-        @media (max-width: 1024px) {
-           .stage-intro {
-             transform: translateX(-50%) scale(0.7); /* Scale down intro on mobile */
-           }
-           
-           /* On mobile docked, we keep it centered but push it back/down and fade slightly */
-           .stage-docked {
-             left: 50%;
-             width: 100vw;
-             top: 10%; /* Move up slightly so it sits behind text */
-             transform: translateX(-50%) scale(0.65); /* Keep it smaller */
-             opacity: 0.4; /* Subtle background element */
-             z-index: 0;
-           }
-        }
-
-        /* Even smaller screens */
-        @media (max-width: 640px) {
-           .stage-intro {
-             transform: translateX(-50%) scale(0.5); 
-           }
-           .stage-docked {
-             top: 0%;
-             transform: translateX(-50%) scale(0.5);
-             opacity: 0.3;
-           }
+        .cylinder-stage {
+          transform-style: preserve-3d;
         }
       `}</style>
 
-      {/* --- 3D STAGE (The Cylinder) --- */}
-      <div 
-        className={`absolute top-0 h-full z-10 stage-container flex items-center justify-center ${viewState === 'intro' ? 'stage-intro' : 'stage-docked'}`}
+      <motion.div
+        initial={{ rotateX: 30, scale: 0.7, opacity: 0, y: 100 }}
+        animate={{ rotateX: 0, scale: 1, opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.2 }} 
+        className="cylinder-stage w-0 h-0 relative"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onPan={(e, info) => {
+           const current = rotation.get();
+           rotation.set(current + info.delta.x * DRAG_FACTOR);
+        }}
       >
-        <CinematicCylinder mode={viewState === 'intro' ? 'intro' : 'docked'} />
-      </div>
+        <motion.div 
+            className="cylinder-ring absolute inset-0"
+            style={{ 
+                transformStyle: "preserve-3d", 
+                rotateY: smoothRotation 
+            }}
+        >
+          {ITEMS.map((item, i) => {
+            const angle = (360 / COUNT) * i;
+            return (
+              <div
+                key={i}
+                className="absolute left-1/2 top-1/2"
+                style={{
+                  width: `${PANEL_WIDTH}px`,
+                  height: `${PANEL_HEIGHT}px`,
+                  marginLeft: `-${PANEL_WIDTH / 2}px`,
+                  marginTop: `-${PANEL_HEIGHT / 2}px`,
+                  transform: `rotateY(${angle}deg) translateZ(${RADIUS}px)`,
+                }}
+              >
+                {/* Image Card: White Background, Dark Border */}
+                <div className="w-full h-full p-2 group">
+                    <div className="w-full h-full relative overflow-hidden bg-white border border-black/10 transition-transform duration-500 hover:scale-[1.02] hover:border-black/30">
+                        <img 
+                            src={item.src} 
+                            alt={item.label}
+                            className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500 grayscale group-hover:grayscale-0" 
+                        />
+                        {/* Inner Gradient for Label Readability */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        
+                        {/* Text Label */}
+                        <div className="absolute bottom-6 left-0 right-0 text-center transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+                            <span className="text-[10px] uppercase tracking-[0.3em] text-white font-manrope">
+                                {item.label}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+              </div>
+            );
+          })}
+        </motion.div>
+      </motion.div>
 
-
-      {/* --- CONTENT LAYER (Left Side) --- */}
-      <div className="absolute inset-0 z-20 pointer-events-none flex flex-col lg:flex-row">
-        
-        {/* Left Column */}
-        <div className="w-full lg:w-[45%] h-full flex flex-col justify-center px-6 sm:px-12 lg:pl-20 pointer-events-auto">
-          
-          {/* Header Tags */}
-          <div className="overflow-hidden h-8 mb-4">
-            <div className={`flex items-center gap-3 text-[10px] font-manrope font-bold tracking-[0.25em] uppercase text-gray-500 transition-transform duration-700 delay-100 ${contentVisible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
-              <div className="w-2 h-2 bg-black rounded-full" />
-              <span>Next Gen Fitting</span>
-            </div>
-          </div>
-
-          {/* Main Title - Compact Typography */}
-          <div className="flex flex-col font-oswald uppercase leading-[0.85] tracking-tight mix-blend-darken text-black mb-8">
-            <div className="overflow-hidden">
-               <h1 className={`text-[3.2rem] sm:text-[4rem] lg:text-[5rem] xl:text-[6rem] font-bold ${contentVisible ? 'reveal-char' : ''}`} style={{ animationDelay: '0.1s' }}>
-                 Virtual
-               </h1>
-            </div>
-            <div className="overflow-hidden">
-               <h1 className={`text-[3.2rem] sm:text-[4rem] lg:text-[5rem] xl:text-[6rem] text-transparent bg-clip-text bg-gradient-to-r from-gray-400 to-black ${contentVisible ? 'reveal-char' : ''}`} style={{ animationDelay: '0.2s' }}>
-                 Experience
-               </h1>
-            </div>
-          </div>
-
-          {/* Description */}
-          <p 
-            className={`font-manrope text-gray-600 text-xs sm:text-sm max-w-sm leading-relaxed mb-10 transition-all duration-1000 ${contentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
-            style={{ transitionDelay: '0.4s' }}
-          >
-            The future of fashion is fluid. Upload your photo and let our neural engine reconstruct your style in real-time 3D environments.
-          </p>
-
-          {/* Controls */}
-          <div 
-            className={`flex items-center gap-4 transition-all duration-1000 ${contentVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
-            style={{ transitionDelay: '0.6s' }}
-          >
-            <button className="h-12 px-8 bg-black text-white font-manrope text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors flex items-center gap-2 group shadow-xl">
-              Start Scan <MoveRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-            <button className="h-12 w-12 border border-black/10 flex items-center justify-center hover:bg-black hover:text-white transition-colors bg-white/50 backdrop-blur-sm">
-               <Play className="w-3 h-3 fill-current" />
-            </button>
-          </div>
-
-        </div>
-      </div>
-
-      {/* --- INTRO LOADING TEXT --- */}
-      <div 
-         className={`absolute inset-0 flex items-center justify-center z-40 pointer-events-none transition-all duration-500 ${viewState === 'intro' ? 'opacity-100 scale-100' : 'opacity-0 scale-150 blur-lg'}`}
-      >
-        <h2 className="font-oswald text-black text-5xl sm:text-6xl lg:text-9xl uppercase italic font-bold tracking-tighter opacity-10 mix-blend-overlay animate-pulse">
-          Loading
-        </h2>
-      </div>
-
-    </section>
+      {/* Cinematic Vignette: Fades to WHITE now */}
+      <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white via-white/80 to-transparent pointer-events-none z-10" />
+      <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none z-10" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,white_100%)] pointer-events-none z-10 opacity-60" />
+    </div>
   );
 };
 
-export default Hero;
+// --- MAIN HERO COMPONENT ---
+const CinematicHero = () => {
+  const [loading, setLoading] = useState(true);
+
+  if (loading) return <Preloader onComplete={() => setLoading(false)} />;
+
+  return (
+    // Changed h-screen to h-[100dvh] for mobile browser support
+    // Changed bg-black to bg-white
+    <main className="relative w-full h-[100dvh] bg-white overflow-hidden selection:bg-black selection:text-white">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600&family=Oswald:wght@300;400;500;700&display=swap');
+        .font-oswald { font-family: 'Oswald', sans-serif; }
+        .font-manrope { font-family: 'Manrope', sans-serif; }
+      `}</style>
+
+      {/* --- 3D SCENE BACKGROUND --- */}
+      <div className="absolute inset-0 z-0 flex items-center justify-center">
+          <div className="w-full h-full scale-[0.55] sm:scale-[0.7] md:scale-[0.85] lg:scale-100 transition-transform duration-1000">
+            <Cylinder3D />
+          </div>
+      </div>
+
+      {/* --- UI OVERLAY --- */}
+      <div className="absolute inset-0 z-20 pointer-events-none flex flex-col justify-end p-6 sm:p-12 md:p-16">
+        
+        {/* Center Title */}
+        {/* Using mix-blend-difference allows black text to be visible on white BG, 
+            AND turns white on top of dark images (smart inversion) */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full mix-blend-difference z-30">
+            <div className="overflow-hidden">
+                <motion.h1 
+                    initial={{ y: "150%" }}
+                    animate={{ y: 0 }}
+                    transition={{ delay: 1.5, duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                    className="font-oswald text-[12vw] sm:text-[9vw] lg:text-[7vw] font-bold uppercase text-black tracking-tighter leading-[0.85]"
+                >
+                    Immersive
+                </motion.h1>
+            </div>
+            <div className="overflow-hidden">
+                <motion.h1 
+                    initial={{ y: "150%" }}
+                    animate={{ y: 0 }}
+                    transition={{ delay: 1.7, duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                    className="font-oswald text-[12vw] sm:text-[9vw] lg:text-[7vw] font-light uppercase text-gray-700 tracking-tighter leading-[0.85]"
+                >
+                    Reality
+                </motion.h1>
+            </div>
+        </div>
+
+        {/* Bottom Bar (Inverted Colors for White Theme) */}
+        <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 2.2, duration: 1 }}
+            className="flex flex-col sm:flex-row items-end sm:items-center justify-between gap-6 pointer-events-auto"
+        >
+            <div className="flex items-center gap-4">
+                <button className="w-10 h-10 sm:w-12 sm:h-12 border border-black/20 rounded-full flex items-center justify-center hover:bg-black hover:text-white transition-all duration-300">
+                    <Play className="w-3 h-3 sm:w-4 sm:h-4 fill-current ml-0.5 text-black hover:text-white transition-colors" />
+                </button>
+                <p className="hidden sm:block max-w-[200px] text-[10px] text-gray-600 font-manrope leading-relaxed uppercase tracking-wide">
+                    Drag to explore the <br/> Fall / Winter 2025 Archive
+                </p>
+            </div>
+
+            <button className="group relative px-6 py-3 sm:px-8 sm:py-4 bg-black text-white font-manrope text-[10px] sm:text-xs font-bold uppercase tracking-widest overflow-hidden">
+                <span className="relative z-10 flex items-center gap-2 group-hover:gap-4 transition-all duration-300">
+                    Enter Gallery <MoveRight size={14} />
+                </span>
+                <div className="absolute inset-0 bg-gray-800 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-500 ease-out" />
+            </button>
+        </motion.div>
+      </div>
+
+    </main>
+  );
+};
+
+export default CinematicHero;
