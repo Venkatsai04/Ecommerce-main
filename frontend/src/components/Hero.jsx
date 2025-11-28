@@ -142,7 +142,8 @@ const Cylinder3D = () => {
                         <img 
                             src={item.src} 
                             alt={item.label}
-                            className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500 grayscale group-hover:grayscale-0" 
+                            // UPDATED: grayscale-[50%] for slight grey, transition-all for smooth color change
+                            className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-all duration-500 grayscale-[50%] group-hover:grayscale-0" 
                         />
                         {/* Inner Gradient for Label Readability */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -176,8 +177,6 @@ const CinematicHero = () => {
   if (loading) return <Preloader onComplete={() => setLoading(false)} />;
 
   return (
-    // Changed h-screen to h-[100dvh] for mobile browser support
-    // Changed bg-black to bg-white
     <main className="relative w-full h-[100dvh] bg-white overflow-hidden selection:bg-black selection:text-white">
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600&family=Oswald:wght@300;400;500;700&display=swap');
@@ -187,7 +186,8 @@ const CinematicHero = () => {
 
       {/* --- 3D SCENE BACKGROUND --- */}
       <div className="absolute inset-0 z-0 flex items-center justify-center">
-          <div className="w-full h-full scale-[0.55] sm:scale-[0.7] md:scale-[0.85] lg:scale-100 transition-transform duration-1000">
+          {/* MOBILE SCALE INCREASED */}
+          <div className="w-full h-full scale-[0.85] sm:scale-[0.7] md:scale-[0.85] lg:scale-100 transition-transform duration-1000">
             <Cylinder3D />
           </div>
       </div>
@@ -196,9 +196,7 @@ const CinematicHero = () => {
       <div className="absolute inset-0 z-20 pointer-events-none flex flex-col justify-end p-6 sm:p-12 md:p-16">
         
         {/* Center Title */}
-        {/* Using mix-blend-difference allows black text to be visible on white BG, 
-            AND turns white on top of dark images (smart inversion) */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full mix-blend-difference z-30">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full z-30">
             <div className="overflow-hidden">
                 <motion.h1 
                     initial={{ y: "150%" }}
@@ -214,14 +212,14 @@ const CinematicHero = () => {
                     initial={{ y: "150%" }}
                     animate={{ y: 0 }}
                     transition={{ delay: 1.7, duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                    className="font-oswald text-[12vw] sm:text-[9vw] lg:text-[7vw] font-light uppercase text-gray-700 tracking-tighter leading-[0.85]"
+                    className="font-oswald text-[12vw] sm:text-[9vw] lg:text-[7vw] font-light uppercase text-gray-500 tracking-tighter leading-[0.85]"
                 >
                     Reality
                 </motion.h1>
             </div>
         </div>
 
-        {/* Bottom Bar (Inverted Colors for White Theme) */}
+        {/* Bottom Bar */}
         <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
