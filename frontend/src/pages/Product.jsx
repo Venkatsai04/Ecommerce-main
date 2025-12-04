@@ -133,8 +133,15 @@ const Product = () => {
           </div>
 
           <div className="w-full sm:w-[80%]">
-            <img src={image} className="w-full h-auto" alt="Product" />
+            <div className="w-full aspect-[4/5] bg-gray-100 rounded-md overflow-hidden">
+              <img
+                src={image}
+                alt="Product"
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
+
         </div>
 
         {/* Product Info */}
