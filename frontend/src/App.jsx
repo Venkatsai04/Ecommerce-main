@@ -20,11 +20,13 @@ import ScrollToTop from './components/ScrollToTop'
 import Profile from './pages/Profile'
 import PaymentSuccess from './pages/PaymentSucces'
 import TryOn from './pages/TryOn'
+import WinterChills from './components/WinterChills'
 
 const App = () => {
   return (
     <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
-      <DiwaliFirework />
+      {/* <DiwaliFirework /> */}
+      <WinterChills/>
       <ToastContainer />
       <NavBar />
       <SearchBar />

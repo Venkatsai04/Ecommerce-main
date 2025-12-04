@@ -1,40 +1,38 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { ShopContext } from '../context/ShopContext'
-import Title from '../components/Title'
-import ProductItem from '../components/ProductItem'
+import React, { useContext, useMemo } from "react";
+import { ShopContext } from "../context/ShopContext";
+import ProductItem from "./ProductItem";
 
-const RelatedProducts = ({category, subCategory}) => {
+const RelatedProducts = ({ currentProductId }) => {
+  const { products } = useContext(ShopContext);
 
-    const {products} = useContext(ShopContext);
-    const [related, setRelated] = useState([]);
+  // Pick 4 random products except the current one
+  const related = useMemo(() => {
+    const filtered = products.filter(p => p._id !== currentProductId);
 
-    useEffect(() => {
-        if (products.length > 0) {
-            let productsCopy = products.slice();
-            productsCopy = productsCopy.filter((item) => category === item.category);
-            productsCopy = productsCopy.filter((item) => subCategory === item.subCategory);
-            setRelated(productsCopy.slice(0, 5));
-        }
-    }, [products]);
+    // Shuffle
+    const shuffled = filtered.sort(() => 0.5 - Math.random());
+
+    // Return 4 random
+    return shuffled.slice(0, 4);
+  }, [products, currentProductId]);
 
   return (
-    <div className='my-24'>
-        <div className='py-2 text-3xl text-center'>
-            <Title text1={'RELATED'} text2={'PRODUCTS'} />
-        </div>
-        <div className='grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-y-6'>
-            {related.map((item, index) => (
-                <ProductItem
-                    key={index}
-                    id={item._id}
-                    name={item.name}
-                    image={item.image}
-                    price={item.price}
-                />
-            ))}
-        </div>
-    </div>
-  )
-}
+    <div className="mt-16">
+      <h2 className="text-xl font-bold mb-6">You may also like</h2>
 
-export default RelatedProducts
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {related.map((item) => (
+          <ProductItem
+            key={item._id}
+            id={item._id}
+            image={item.image}
+            name={item.name}
+            price={item.price}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default RelatedProducts;
