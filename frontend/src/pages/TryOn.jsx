@@ -1,12 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom'; // Import router hooks
 import { Upload, Loader2, Sparkles, AlertCircle, X, Ruler, MapPin, Coffee, Building2, User, Lock, Briefcase, Download } from 'lucide-react';
 
 // --- API Configuration ---
-// WARNING: Never expose API keys in frontend code in production. Use Environment Variables.
-const apiKey = "AIzaSyCMcq20bgJU0KAw4t_7E7WQW7-61QBQWT8"; 
+const apiKey = "AIzaSyBAi6fPzKMZpH_3nfXyVzxzqupvZIm60jg"; // Keep your API Key here
 
-// --- SCENES CONSTANT ---
+// --- SCENES CONSTANT (Kept the same) ---
 const SCENES = [
   { id: 'original', label: 'Studio Grey', icon: <User className="w-4 h-4" />, prompt: "Keep a simple, high-end clean grey studio background. Professional lighting." },
   { id: 'office', label: 'Modern Office', icon: <Briefcase className="w-4 h-4" />, prompt: "Place the man in a high-end, glass-walled executive office with city views. Professional, corporate atmosphere." },
@@ -40,20 +39,19 @@ const fileToBase64 = (file) => {
   });
 };
 
-// --- Mock Product for Testing (If not coming from router) ---
-const DEMO_PRODUCT = {
-  name: "Classic Midnight Navy Suit",
-  price: 299.00,
-  // Using a placeholder image for the garment
-  image: "https://images.unsplash.com/photo-1594938298603-c8148c47e356?q=80&w=1000&auto=format&fit=crop" 
+const urlToBase64 = async (url) => {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  return fileToBase64(blob);
 };
 
 const TryOn = () => {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // State
-  const [product, setProduct] = useState(null);
+  // 1. GET PRODUCT FROM NAVIGATION STATE
+  const product = location.state?.product;
+
   const [userImage, setUserImage] = useState(null);
   const [garmentImage, setGarmentImage] = useState(null);
   const [resultImage, setResultImage] = useState(null);
@@ -64,27 +62,24 @@ const TryOn = () => {
   const [error, setError] = useState(null);
   const userFileInputRef = useRef(null);
 
-  // 1. Initialize Product (From Router or Fallback)
+  // 2. LOAD PRODUCT IMAGE ON MOUNT
   useEffect(() => {
-    if (location.state?.product) {
-      setProduct(location.state.product);
-      // Convert product URL to base64 for API
-      fetch(location.state.product.image)
-        .then(res => res.blob())
-        .then(blob => fileToBase64(blob))
-        .then(base64 => setGarmentImage(base64))
-        .catch(() => setError("Could not load product image."));
-    } else {
-      // FALLBACK FOR DIRECT ACCESS TESTING
-      console.log("No product found in state, using DEMO product.");
-      setProduct(DEMO_PRODUCT);
-      fetch(DEMO_PRODUCT.image)
-        .then(res => res.blob())
-        .then(blob => fileToBase64(blob))
-        .then(base64 => setGarmentImage(base64))
-        .catch(() => setError("Could not load demo product image."));
+    if (!product) {
+      // If user comes here directly without clicking a product, send them back
+      navigate('/collection'); 
+      return;
     }
-  }, [location.state]);
+
+    const loadProduct = async () => {
+      try {
+        const base64 = await urlToBase64(product.image);
+        setGarmentImage(base64);
+      } catch (e) {
+        setError("Failed to load product image.");
+      }
+    };
+    loadProduct();
+  }, [product, navigate]);
 
   const handleUserUpload = async (e) => {
     const file = e.target.files[0];
@@ -102,15 +97,17 @@ const TryOn = () => {
     }
   };
 
+
   const validateGender = async () => {
     try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      const response = await fetchWithRetry(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             contents: [{
+              role: "user",
               parts: [
                 { text: "Look at this image. Is the primary subject 'Male' or 'Female'? Answer with exactly one word: 'Male' or 'Female'." },
                 { inlineData: { mimeType: userImage.mime, data: userImage.raw } }
@@ -122,15 +119,42 @@ const TryOn = () => {
       );
       
       const data = await response.json();
-      return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim()?.toLowerCase() || 'male';
+      return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim()?.toLowerCase();
     } catch (e) {
-      console.warn("Gender validation skipped due to API error", e);
-      return 'male'; // Default to male if API fails so flow continues
+      console.warn("Gender validation skipped/failed", e);
+      return null; // Skip validation on error to be less restrictive
     }
   };
 
+  const generateWithImagen = async (fitDescription, scenePrompt) => {
+    // Fallback: Use Imagen 4.0 to generate a fresh image based on the prompt
+    setLoadingStep('Generating Style Preview (Fallback)...');
+    
+    const prompt = `A professional photorealistic full-body shot of a male model wearing ${product.name}, Size ${selectedSize} (${fitDescription}). ${scenePrompt}. High fashion photography, highly detailed texture.`;
+    
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          instances: [{ prompt: prompt }],
+          parameters: { sampleCount: 1 }
+        })
+      }
+    );
+
+    if (!response.ok) throw new Error("Style Preview generation failed.");
+    const result = await response.json();
+    const base64 = result.predictions?.[0]?.bytesBase64Encoded;
+    if (!base64) throw new Error("No image generated.");
+    
+    setIsFallback(true);
+    return `data:image/png;base64,${base64}`;
+  };
+
   const handleGenerate = async () => {
-    if (!userImage || !garmentImage) {
+    if (!userImage) {
       setError('Please upload your photo.');
       return;
     }
@@ -138,44 +162,87 @@ const TryOn = () => {
     setLoading(true);
     setError(null);
     setResultImage(null);
+    setIsFallback(false);
 
     try {
-      // Step 1: Analyze
+      // 1. Gender Check
       setLoadingStep('Analysing Subject...');
       const detectedGender = await validateGender();
-      
-      if (detectedGender === 'female') {
+      if (detectedGender && detectedGender.includes('female')) {
         throw new Error("Gender Mismatch: This item is designed for Men.");
       }
 
-      // Step 2: Generate
-      setLoadingStep('Tailoring Suit...');
-      
-      // NOTE: Gemini 1.5 Flash is text-to-text/multimodal. It cannot natively generate images via this API endpoint yet.
-      // To prevent the app from failing, we will simulate the generation delay and return the user image
-      // In a real production app, you would use Stable Diffusion or DALL-E API here.
-      
-      await new Promise(resolve => setTimeout(resolve, 3000)); // Simulate processing time
+      // 2. Prep Params
+      let fitDescription = "Regular Fit";
+      if (['S', 'M'].includes(selectedSize)) fitDescription = "Slim, sharp tailored fit";
+      if (['XL', 'XXL'].includes(selectedSize)) fitDescription = "Broad, relaxed comfort fit";
+      const scenePrompt = SCENES.find(s => s.id === selectedScene)?.prompt || SCENES[0].prompt;
 
-      // For this demo, we just pass the user image back as the "result"
-      // because 1.5 Flash cannot actually generate the pixels.
-      setResultImage(userImage.full); 
-      
-      // If you have access to Imagen 3 or a specific image generation model, uncomment below:
-      /* const response = await fetch(...) 
-      // ... normal API call ...
-      */
+      // 3. Try Primary Model (Gemini 2.5 Flash Image)
+      setLoadingStep('Tailoring Suit (Try-On)...');
+      let garmentRaw = garmentImage?.raw;
+      if (!garmentRaw) {
+           const resp = await fetch(product.image);
+           const blob = await resp.blob();
+           const b64 = await fileToBase64(blob);
+           garmentRaw = b64.raw;
+      }
+
+      try {
+        const response = await fetchWithRetry(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}`,
+            {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{
+                parts: [
+                    {
+                    text: `Act as a high-end menswear stylist AI.
+                    GOAL: Generate a photorealistic image of the Man wearing the garment shown in the second image.
+                    CONFIG:
+                    - Garment Name: ${product.name}
+                    - Size: EU ${selectedSize} (${fitDescription})
+                    - Scene: ${scenePrompt}
+                    INSTRUCTIONS:
+                    1. Replace the man's current outfit with the ${product.name}.
+                    2. Keep the man's identity, hair, and facial features EXACTLY the same.
+                    `
+                    },
+                    { inlineData: { mimeType: userImage.mime, data: userImage.raw } },
+                    { inlineData: { mimeType: "image/png", data: garmentRaw } }
+                ]
+                }],
+                generationConfig: { responseModalities: ["IMAGE"], temperature: 0.4 }
+            })
+            }
+        );
+
+        if (!response.ok) throw new Error("Try-On Limit Reached"); // Force fallback on any error
+        const result = await response.json();
+        const base64Image = result.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+        
+        if (!base64Image) throw new Error("No image data");
+        setResultImage(`data:image/png;base64,${base64Image}`);
+
+      } catch (primaryError) {
+        console.warn("Primary Try-On failed, switching to Fallback:", primaryError);
+        // 4. Fallback to Imagen (Style Preview)
+        const fallbackImage = await generateWithImagen(fitDescription, scenePrompt);
+        setResultImage(fallbackImage);
+      }
 
     } catch (err) {
       console.error(err);
-      setError(err.message || 'Something went wrong.');
+      setError(err.message || 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);
       setLoadingStep('');
     }
   };
 
-  if (!product) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin" /></div>;
+  // If no product is loaded yet (or redirecting), return nothing
+  if (!product) return null;
 
   return (
     <div className="max-w-[1920px] mx-auto bg-white min-h-screen text-zinc-900 font-sans border-t-4 border-black box-border">
@@ -198,7 +265,7 @@ const TryOn = () => {
         {/* Left Col: Inputs */}
         <div className="lg:col-span-3 border-r-0 lg:border-r-4 border-b-4 lg:border-b-0 border-black p-6 space-y-8 bg-white">
           
-          {/* Garment Section */}
+          {/* Garment Section (DYNAMIC DATA) */}
           <div className="space-y-4">
              <h3 className="text-xs font-black uppercase tracking-widest text-black flex items-center gap-2">
                <div className="w-2 h-2 bg-black"></div>
@@ -219,12 +286,13 @@ const TryOn = () => {
                     {product.name}
                 </p>
                 <p className="text-sm font-medium text-gray-500 mt-1">
-                   ${typeof product.price === 'number' ? product.price : product.price}
+                   {/* Format price if needed, assuming product.price is a number */}
+                   {typeof product.price === 'number' ? `$${product.price}` : product.price}
                 </p>
              </div>
           </div>
 
-          {/* User Profile Section */}
+          {/* User Profile Section (Unchanged) */}
           <div className="space-y-4">
              <h3 className="text-xs font-black uppercase tracking-widest text-black flex items-center gap-2">
                <div className="w-2 h-2 bg-black"></div>
@@ -265,8 +333,9 @@ const TryOn = () => {
 
         </div>
 
-        {/* Center Col: Configuration */}
+        {/* Center Col: Configuration (Unchanged logic, just UI structure) */}
         <div className="lg:col-span-3 border-r-0 lg:border-r-4 border-b-4 lg:border-b-0 border-black p-6 flex flex-col bg-white">
+           {/* ... Sizing and Scenery code remains exactly as provided in your previous snippet ... */}
            <div className="flex-1 space-y-12">
             {/* Sizing */}
             <div className="space-y-4">
@@ -320,24 +389,24 @@ const TryOn = () => {
           </div>
         </div>
 
-        {/* Right Col: Result */}
+        {/* Right Col: Result (Unchanged) */}
         <div className="lg:col-span-6 bg-zinc-50 relative overflow-hidden flex flex-col items-center justify-center min-h-[500px]">
            <div className="absolute inset-0 pointer-events-none opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
            
            {resultImage && (
-             <div className="absolute top-6 right-6 z-10">
-               <button 
-                 onClick={() => {
-                   const link = document.createElement('a');
-                   link.href = resultImage;
-                   link.download = `try-on-result.png`;
-                   link.click();
-                 }}
-                 className="bg-white border-2 border-black text-black px-6 py-3 text-xs font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-colors flex items-center gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
-               >
-                 <Download className="w-3 h-3" /> Download
-               </button>
-             </div>
+              <div className="absolute top-6 right-6 z-10">
+                <button 
+                  onClick={() => {
+                    const link = document.createElement('a');
+                    link.href = resultImage;
+                    link.download = `try-on-result.png`;
+                    link.click();
+                  }}
+                  className="bg-white border-2 border-black text-black px-6 py-3 text-xs font-bold uppercase tracking-widest hover:bg-black hover:text-white transition-colors flex items-center gap-2 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[2px] hover:translate-y-[2px]"
+                >
+                  <Download className="w-3 h-3" /> Download
+                </button>
+              </div>
            )}
 
            <div className="w-full h-full p-8 flex items-center justify-center">
