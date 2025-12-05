@@ -2,17 +2,23 @@ import React, { useEffect, useState } from "react";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import { Route, Routes } from "react-router-dom";
+
 import Add from "./pages/Add";
 import List from "./pages/List";
 import Orders from "./pages/Orders";
 import Login from "./components/Login";
+import Update from "./pages/Update"; // ✅ NEW IMPORT
+
 import { ToastContainer, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 export const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 export const currency = (price) => {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(price);
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD"
+  }).format(price);
 };
 
 const App = () => {
@@ -24,20 +30,31 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <ToastContainer position="top-right" autoClose={2000} theme="colored" transition={Slide} />
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        theme="colored"
+        transition={Slide}
+      />
 
+      {/* LOGIN OR ADMIN UI */}
       {token === "" ? (
         <Login setToken={setToken} />
       ) : (
         <div className="flex flex-col min-h-screen">
           <Navbar setToken={setToken} />
+
           <div className="flex flex-1 pt-16">
-           
+            {/* Sidebar (optional but recommended) */}
+            {/* <Sidebar /> */}
+
             <main className="flex-1 p-4 md:p-8 overflow-y-auto">
               <Routes>
                 <Route path="/add" element={<Add token={token} />} />
                 <Route path="/list" element={<List token={token} />} />
                 <Route path="/orders" element={<Orders token={token} />} />
+                <Route path="/update" element={<Update token={token} />} />
+
               </Routes>
             </main>
           </div>

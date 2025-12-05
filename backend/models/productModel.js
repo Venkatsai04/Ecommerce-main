@@ -31,12 +31,18 @@ const productSchema = new mongoose.Schema({
   },
   bestSeller: {
     type: Boolean,
+    default: false,
+  },
+  soldOut: {
+    type: Boolean,
+    default: false,
   },
   date: {
     type: Number,
     required: true,
   },
 });
+
 
 const productModel = mongoose.models.product || mongoose.model("product", productSchema);
 

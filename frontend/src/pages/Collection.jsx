@@ -175,7 +175,7 @@ const Collection = () => {
                   onClick={() => toggle(t, setSelectedTypes, selectedTypes)}
                   className={`
                     px-3 py-1 text-sm 
-                    border border-gray-400 
+                    border rounded border-gray-400 
                     ${
                       selectedTypes.includes(t)
                         ? "bg-black text-white"
@@ -198,7 +198,7 @@ const Collection = () => {
                   onClick={() => toggle(s, setSelectedSizes, selectedSizes)}
                   className={`
                     px-3 py-1 text-sm 
-                    border border-gray-400 
+                    border rounded border-gray-400 
                     ${
                       selectedSizes.includes(s)
                         ? "bg-black text-white"
@@ -215,14 +215,14 @@ const Collection = () => {
             <div className="flex justify-between mt-8">
               <button
                 onClick={clearFilters}
-                className="px-4 py-2 bg-gray-100 text-sm"
+                className="px-4 rounded py-2 bg-gray-100 text-sm"
               >
                 Reset
               </button>
 
               <button
                 onClick={() => setFilterOpen(false)}
-                className="px-6 py-2 bg-black text-white text-sm"
+                className="px-6 rounded py-2 bg-black text-white text-sm"
               >
                 Apply
               </button>

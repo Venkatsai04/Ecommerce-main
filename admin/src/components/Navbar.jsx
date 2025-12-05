@@ -25,6 +25,10 @@ const Navbar = ({ setToken }) => {
           <Link to="/orders" className="text-gray-700 hover:text-black">
             Orders
           </Link>
+          <Link to="/update" className="text-gray-700 hover:text-black">
+            Update Items
+          </Link>
+
           <button
             onClick={() => setToken("")}
             className="px-5 py-2 text-sm font-medium text-white bg-gray-800 rounded-full hover:bg-gray-900"
@@ -44,9 +48,8 @@ const Navbar = ({ setToken }) => {
 
       {/* Mobile Sliding Menu */}
       <div
-        className={`md:hidden fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${
-          menuOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`md:hidden fixed top-0 right-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out ${menuOpen ? "translate-x-0" : "translate-x-full"
+          }`}
       >
         <div className="flex flex-col mt-20 items-start px-6 space-y-6">
           <Link
@@ -70,6 +73,14 @@ const Navbar = ({ setToken }) => {
           >
             Orders
           </Link>
+          <Link
+            to="/update"
+            className="text-gray-700 hover:text-black"
+            onClick={() => setMenuOpen(false)}
+          >
+            Update Items
+          </Link>
+
           <button
             onClick={() => {
               setToken("");

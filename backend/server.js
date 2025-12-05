@@ -11,6 +11,7 @@ import orderRoutes from "./routes/orderRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import paymentRoutes from './routes/paymentRoute.js';
 import shippingRoutes from "./routes/shippingRoutes.js";
+import tryOnRoute from "./routes/tryOnRoute.js";
 
 
 
@@ -32,6 +33,8 @@ app.use("/api/order", orderRoutes);
 app.use("/api", cartRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use("/api/shipping", shippingRoutes);
+app.use("/api/tryon", tryOnRoute);
+
 
 
 

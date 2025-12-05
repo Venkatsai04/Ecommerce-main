@@ -14,9 +14,9 @@ const apiKey = import.meta.env.VITE_API_KEY; // <--- PASTE YOUR API KEY HERE
 const SCENES = [
   { 
     id: 'original', 
-    label: 'Studio Grey', 
+    label: 'original', 
     icon: <User className="w-4 h-4" />,
-    prompt: "Keep a simple, high-end clean grey studio background. Professional lighting." 
+    prompt: "Keep the original secne" 
   },
   { 
     id: 'wedding', 
