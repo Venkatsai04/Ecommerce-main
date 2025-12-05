@@ -114,23 +114,25 @@ const Product = () => {
       <div className="flex flex-col gap-12 sm:flex-row">
         {/* Product Images */}
         <div className="flex flex-col-reverse flex-1 gap-3 sm:flex-row">
-          <div className="flex justify-between overflow-x-auto sm:flex-col sm:overflow-y-scroll sm:w-[18.7%] w-full gap-3">
+          {/* Thumbnails */}
+          <div className="flex sm:flex-col gap-3 overflow-x-auto sm:overflow-visible w-full sm:w-[18%]">
             {productData.image.map((item, index) => (
               <div
                 key={index}
                 onClick={() => setImage(item)}
-                className={`cursor-pointer rounded-md overflow-hidden border 
+                className={`cursor-pointer border rounded-md overflow-hidden 
         ${image === item ? "border-black" : "border-gray-300"}
-        flex-shrink-0 w-[24%] sm:w-full aspect-square bg-gray-100`}
+        flex-shrink-0 w-20 h-20 sm:w-full sm:h-auto sm:aspect-square bg-gray-100`}
               >
                 <img
                   src={item}
-                  alt="Product"
+                  alt="Thumbnail"
                   className="w-full h-full object-cover"
                 />
               </div>
             ))}
           </div>
+
 
           <div className="w-full sm:w-[80%]">
             <div className="w-full aspect-[4/5] bg-gray-100 rounded-md overflow-hidden">
@@ -147,10 +149,32 @@ const Product = () => {
         {/* Product Info */}
         <div className="flex-1">
           <h1 className="mt-2 text-2xl font-medium">{productData.name}</h1>
-          <p className="mt-5 text-3xl font-medium">
-            {currency}
-            {productData.price}
-          </p>
+          {/* PRICE WITH 69% OFF */}
+          <div className="mt-5">
+            <div className="flex items-center gap-3">
+
+              {/* Real Price */}
+              <p className="text-3xl font-medium">
+                {currency}{productData.price}
+              </p>
+
+              {/* Original MRP (calculated for exact 69% OFF) */}
+              {(() => {
+                const originalPrice = Math.round(productData.price / 0.31);
+                return (
+                  <>
+                    <p className="text-lg line-through text-gray-500">
+                      {currency}{originalPrice}
+                    </p>
+                    <p className="text-lg font-bold text-green-600">
+                      69% OFF
+                    </p>
+                  </>
+                );
+              })()}
+            </div>
+          </div>
+
 
           <div className="flex flex-col gap-4 my-8">
             <p>Select Size</p>
@@ -184,10 +208,10 @@ const Product = () => {
             {/* NEW: Virtual Try On Button */}
             <button
               onClick={handleTryOn}
-              className="px-8 py-3 text-sm text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 shadow-md transition-all flex items-center gap-2"
+              className="px-8 py-3 text-sm text-white bg-gradient-to-r from-yellow-600 to-purple-600 hover:opacity-90 shadow-md transition-all flex items-center gap-2"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-              TRY ON
+
+              TRY ON ✨
             </button>
           </div>
 
@@ -204,7 +228,7 @@ const Product = () => {
                 value={pincode}
                 onChange={(e) => setPincode(e.target.value)}
                 placeholder="Enter Pincode"
-                className="border-2 border-black bg-yellow-50 text-black px-4 py-2 w-40 font-semibold tracking-wide placeholder:text-gray-500 focus:outline-none focus:border-gray-800 transition-all"
+                className="border-2 border-black text-black px-4 py-2 w-40 font-semibold tracking-wide placeholder:text-gray-500 focus:outline-none focus:border-gray-800 transition-all"
               />
               <button
                 onClick={handleCheckPincode}
@@ -247,6 +271,34 @@ const Product = () => {
               <p className="text-gray-700 leading-relaxed text-sm md:text-base mb-6">
                 {productData.description || "No description available for this product."}
               </p>
+
+              {/* CARE & RETURNS */}
+              <div className="mt-10">
+
+                {/* HEADER (same UI as Product Description) */}
+                <h3 className="text-lg font-extrabold mb-3 uppercase tracking-tight">
+                  Care & Returns
+                </h3>
+
+                {/* CARE */}
+                <p className="text-gray-700 leading-relaxed text-sm md:text-base mb-4">
+                  <span className="font-semibold">Care Instructions:</span><br />
+                  • Machine wash cold (30°C) <br />
+                  • Wash with similar colors <br />
+                  • Do not bleach <br />
+                  • Low heat iron only <br />
+                  • Air dry recommended
+                </p>
+
+                {/* RETURNS */}
+                <p className="text-gray-700 leading-relaxed text-sm md:text-base">
+                  <span className="font-semibold">Returns:</span><br />
+                  This item is <span className="font-bold">not eligible for returns</span>.
+                  Please review the size chart and details before ordering.
+                </p>
+
+              </div>
+
 
               {/* --- REVIEWS SECTION --- */}
               <div className="mt-6 border-t pt-6">
