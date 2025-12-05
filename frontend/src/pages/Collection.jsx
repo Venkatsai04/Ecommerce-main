@@ -1,159 +1,216 @@
 import React, { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
-import { assets } from "../assets/assets";
 import Title from "../components/Title";
 import ProductItem from "../components/ProductItem";
 
 const Collection = () => {
   const { products, search, showSearch } = useContext(ShopContext);
-  const [showFilter, setShowFilter] = useState(false);
-  const [filterProducts, setFilterProducts] = useState([]);
-  const [category, setCategory] = useState([]);
-  const [sortType, setSortType] = useState("relevant");
 
-  const toggleCategory = (e) => {
-    if (category.includes(e.target.value)) {
-      setCategory((prev) => prev.filter((item) => item !== e.target.value));
-    } else {
-      setCategory((prev) => [...prev, e.target.value]);
-    }
+  const [filtered, setFiltered] = useState([]);
+
+  const [category, setCategory] = useState([]);
+  const [sizes, setSizes] = useState([]);
+
+  const [sortType, setSortType] = useState("relevant");
+  const [sortOpen, setSortOpen] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
+
+  const toggle = (value, setter, list) => {
+    setter(
+      list.includes(value)
+        ? list.filter((i) => i !== value)
+        : [...list, value]
+    );
   };
 
   const applyFilter = () => {
-    let productsCopy = products.slice();
+    let copy = [...products];
 
     if (showSearch && search) {
-      productsCopy = productsCopy.filter((item) =>
-        item.name.toLowerCase().includes(search.toLowerCase())
+      copy = copy.filter((i) =>
+        i.name.toLowerCase().includes(search.toLowerCase())
       );
     }
 
     if (category.length > 0) {
-      productsCopy = productsCopy.filter((item) =>
-        category.includes(item.category)
-      );
+      copy = copy.filter((i) => category.includes(i.category));
     }
 
-    setFilterProducts(productsCopy);
+    if (sizes.length > 0) {
+      copy = copy.filter((i) => sizes.includes(i.size));
+    }
+
+    setFiltered(copy);
   };
 
-  const sortProduct = () => {
-    let fpCopy = filterProducts.slice();
-
-    switch (sortType) {
-      case "low-high":
-        setFilterProducts(fpCopy.sort((a, b) => a.price - b.price));
-        break;
-      case "high-low":
-        setFilterProducts(fpCopy.sort((a, b) => b.price - a.price));
-        break;
-      default:
-        applyFilter();
-        break;
+  const applySort = () => {
+    if (sortType === "low-high") {
+      setFiltered((prev) => [...prev].sort((a, b) => a.price - b.price));
+    } else if (sortType === "high-low") {
+      setFiltered((prev) => [...prev].sort((a, b) => b.price - a.price));
+    } else {
+      applyFilter();
     }
   };
 
-  const clearFilters = () => setCategory([]);
+  const clearFilters = () => {
+    setCategory([]);
+    setSizes([]);
+  };
 
-  useEffect(() => {
-    if (products.length > 0) applyFilter();
-  }, [category, search, showSearch, products]);
-
-
-  useEffect(() => {
-    sortProduct();
-  }, [sortType]);
+  useEffect(() => applyFilter(), [category, sizes, search, showSearch, products]);
+  useEffect(() => applySort(), [sortType]);
 
   return (
-    <div className="flex flex-col sm:flex-row gap-6 sm:gap-10 pt-10 border-t bg-white min-h-screen px-4 sm:px-8">
-      {/* FILTER PANEL */}
-      <div className="sm:min-w-60">
-        <div
-          onClick={() => setShowFilter(!showFilter)}
-          className="flex items-center justify-between sm:justify-start gap-2 my-2 text-lg sm:text-xl font-semibold cursor-pointer text-gray-700"
-        >
-          <p>FILTERS</p>
-          <img
-            className={`h-3 sm:hidden transition-transform ${showFilter ? "rotate-90" : ""
-              }`}
-            src={assets.dropdown_icon}
-            alt="Dropdown"
-          />
-        </div>
+    <div className="px-4 py-6 bg-white min-h-screen">
 
-        {/* Category Filters */}
-        <div
-          className={`border border-gray-200 rounded-xl shadow-sm pl-5 py-3 mt-4 transition-all duration-300 ${showFilter ? "block" : "hidden"
-            } sm:block`}
-        >
-          <p className="mb-3 text-sm font-semibold text-gray-800">
-            DIYAS CATEGORY
-          </p>
-          <div className="flex flex-col gap-2 text-sm font-light text-gray-600">
-            {[
-              "Designer Diyas",
-              "Elegant Diyas",
-              "Hanging Diyas",
-              "Minimalist Diyas",
-            ].map((cat) => (
-              <label key={cat} className="flex items-center gap-2 cursor-pointer">
-                <input
-                  className="w-3 accent-yellow-500"
-                  type="checkbox"
-                  value={cat}
-                  onChange={toggleCategory}
-                  checked={category.includes(cat)}
-                />
-                {cat}
-              </label>
-            ))}
-          </div>
-        </div>
+      {/* HEADER */}
+      <div className="flex justify-between items-center mb-5">
+        <Title text1="MEN'S" text2="COLLECTION" />
 
-        {/* Clear Filters Button */}
+        {/* Filter button stays clean — no borders */}
         <button
-          onClick={clearFilters}
-          className={`px-4 py-2 mt-4 text-sm font-semibold text-white rounded-full shadow-md bg-gradient-to-r from-orange-400 to-yellow-400 hover:opacity-90 transition-all duration-300 ${showFilter ? "block" : "hidden"
-            } sm:block`}
+          onClick={() => setFilterOpen(true)}
+          className="px-3 py-2 rounded-lg bg-gray-100 text-sm text-gray-800"
         >
-          Clear Filters
+          Filters
         </button>
       </div>
 
-      {/* PRODUCTS SECTION */}
-      <div className="flex-1">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-3">
-          <Title text1={"DIWALI"} text2={"COLLECTIONS"} />
-
-          <select
-            onChange={(e) => setSortType(e.target.value)}
-            className="px-3 py-2 text-sm border-2 border-gray-200 rounded-lg bg-white shadow-sm focus:outline-none focus:border-yellow-400"
-          >
-            <option value="relevant">Sort by: Relevant</option>
-            <option value="low-high">Sort by: Low to High</option>
-            <option value="high-low">Sort by: High to Low</option>
-          </select>
+      {/* SORT DROPDOWN — outer button clean */}
+      <div className="relative w-full">
+        <div
+          onClick={() => setSortOpen(!sortOpen)}
+          className="
+            w-full p-3 rounded-lg 
+            bg-gray-100 text-gray-800 text-sm 
+            flex justify-between items-center cursor-pointer
+          "
+        >
+          <span>
+            {sortType === "relevant"
+              ? "Sort by: Relevant"
+              : sortType === "low-high"
+              ? "Sort by: Low → High"
+              : "Sort by: High → Low"}
+          </span>
+          <span className="text-lg">▾</span>
         </div>
 
-        {/* Product Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-6">
-          {filterProducts.length > 0 ? (
-            filterProducts.map((item, index) => (
-              <ProductItem
-                key={index}
-                id={item._id}
-                name={item.name}
-                image={item.image}
-                price={item.price}
-              />
-            ))
-          ) : (
-            <p className="col-span-full mt-10 text-center text-gray-500 text-sm sm:text-base">
-              No diyas found in this category 🎇
-            </p>
-          )}
-        </div>
+        {/* Dropdown menu — inside items get square borders */}
+        {sortOpen && (
+          <div className="absolute left-0 w-full bg-white border border-gray-300 rounded-md mt-1 z-20">
+
+            <button
+              onClick={() => { setSortType("relevant"); setSortOpen(false); }}
+              className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 border-b border-gray-200"
+            >
+              Relevant
+            </button>
+
+            <button
+              onClick={() => { setSortType("low-high"); setSortOpen(false); }}
+              className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 border-b border-gray-200"
+            >
+              Price: Low → High
+            </button>
+
+            <button
+              onClick={() => { setSortType("high-low"); setSortOpen(false); }}
+              className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+            >
+              Price: High → Low
+            </button>
+
+          </div>
+        )}
       </div>
+
+      {/* PRODUCT GRID */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6">
+        {filtered.length > 0 ? (
+          filtered.map((item, index) => (
+            <ProductItem
+              key={index}
+              id={item._id}
+              name={item.name}
+              image={item.image}
+              price={item.price}
+            />
+          ))
+        ) : (
+          <p className="col-span-full text-center mt-10 text-gray-500">
+            No products found.
+          </p>
+        )}
+      </div>
+
+      {/* FILTER MODAL */}
+      {filterOpen && (
+        <div className="fixed inset-0 bg-black/30 flex justify-center items-end sm:items-center z-40">
+          <div className="bg-white w-full sm:w-[420px] rounded-t-xl sm:rounded-xl p-6">
+
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-medium">Filters</h2>
+              <button onClick={() => setFilterOpen(false)}>✕</button>
+            </div>
+
+            {/* CATEGORY — minimal square borders */}
+            <p className="text-sm font-medium text-gray-700">Category</p>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {["Hoodies", "Zippers", "Jackets", "Wind Jackets", "Vintage & Rare"].map((c) => (
+                <button
+                  key={c}
+                  onClick={() => toggle(c, setCategory, category)}
+                  className={`
+                    px-3 py-1 rounded-md text-sm
+                    border border-gray-300
+                    ${category.includes(c) ? "bg-black text-white" : "bg-white text-gray-800"}
+                  `}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+
+            {/* SIZE — same minimal style */}
+            <p className="text-sm font-medium text-gray-700 mt-5">Sizes</p>
+            <div className="flex gap-2 mt-2">
+              {["S", "M", "L", "XL", "XXL"].map((s) => (
+                <button
+                  key={s}
+                  onClick={() => toggle(s, setSizes, sizes)}
+                  className={`
+                    px-3 py-1 rounded-md text-sm
+                    border border-gray-300
+                    ${sizes.includes(s) ? "bg-black text-white" : "bg-white text-gray-800"}
+                  `}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+
+            {/* ACTION BUTTONS */}
+            <div className="flex justify-between mt-8">
+              <button
+                onClick={clearFilters}
+                className="px-4 py-2 rounded-md bg-gray-100 text-sm"
+              >
+                Reset
+              </button>
+
+              <button
+                onClick={() => setFilterOpen(false)}
+                className="px-6 py-2 rounded-md bg-black text-white text-sm"
+              >
+                Apply
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 };

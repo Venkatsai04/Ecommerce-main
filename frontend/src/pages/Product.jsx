@@ -228,7 +228,7 @@ const Product = () => {
                         ? "a few days"
                         : `${deliveryInfo.delivery_range} days`}
                     </span>{" "}
-                    (from ₹{deliveryInfo.min_charges})
+                    {/* (from ₹{deliveryInfo.min_charges}) */}
                   </p>
                 ) : (
                   <p className="text-red-600 font-semibold">

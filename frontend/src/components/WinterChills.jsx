@@ -24,7 +24,7 @@ const WinterChills = () => {
         // Random spread for falling motion
         destX: (Math.random() - 0.5) * 150, // Sway left/right
         destY: Math.random() * 200 + 100,   // Fall distance
-        size: Math.random() * 1.5 + 0.8,    // Random size scale
+        size: Math.random() * 0.8 + 0.5,    // Random size scale
         duration: Math.random() * 1 + 1,    // Random fall speed (1s to 2s)
         rotation: Math.random() * 360       // Random starting rotation
       }));
