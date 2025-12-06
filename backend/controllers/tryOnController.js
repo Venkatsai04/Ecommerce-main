@@ -4,12 +4,52 @@ dotenv.config();
 
 // --- MODEL CONFIGURATION ---
 // Note: This model (imagen-3.0-generate-002) is generally a paid service.
-const MODEL_IMAGE = process.env.GEMINI_IMAGE_MODEL || "imagen-3.0-generate-002"; 
+const MODEL_IMAGE = process.env.GEMINI_IMAGE_MODEL || "gemini-2.5-flash-image"; // Try this if 3.0 fails.
 const API_KEY = process.env.GOOGLE_API_KEY;
 
 if (!API_KEY) {
     console.warn("Missing GOOGLE_API_KEY in env!");
 }
+
+// --- New Utility Function to List Models ---
+const listAvailableModels = async () => {
+    console.log("--- Fetching Available Models ---");
+    const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`;
+    
+    try {
+        const res = await fetch(listUrl);
+        const data = await res.json();
+        
+        if (data.error) {
+            console.error("Error listing models:", data.error.message);
+            return [];
+        }
+
+        // Filter for models that support the generateContent method
+        const supportedModels = data.models.filter(model => 
+            model.supportedGenerationMethods.includes("generateContent")
+        );
+
+        console.log("Total models supporting generateContent:", supportedModels.length);
+
+        // Map and log only the essential info
+        const modelNames = supportedModels.map(model => ({
+            name: model.name,
+            version: model.version,
+            description: model.description,
+            methods: model.supportedGenerationMethods.join(', ')
+        }));
+
+        console.table(modelNames);
+        return supportedModels;
+        
+    } catch (err) {
+        console.error("Network error during ListModels call:", err);
+        return [];
+    }
+};
+
+await listAvailableModels();
 
 // Helper: simple backoff fetch
 const fetchWithBackoff = async (url, options, retries = 3) => {

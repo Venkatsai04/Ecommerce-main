@@ -1,12 +1,12 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { ShopContext } from '../context/ShopContext';
-import Title from '../components/Title';
+import React, { useContext, useEffect, useState } from "react";
+import { ShopContext } from "../context/ShopContext";
+import Title from "../components/Title";
 
 const Orders = () => {
   const { currency } = useContext(ShopContext);
   const [orders, setOrders] = useState([]);
 
-  // Tracking modal states
+  // Tracking modal state
   const [trackingOrder, setTrackingOrder] = useState(null);
   const [isTrackingOpen, setIsTrackingOpen] = useState(false);
 
@@ -23,23 +23,21 @@ const Orders = () => {
     fetchOrders();
   }, []);
 
-  // Open tracking modal
   const openTracking = (order) => {
     setTrackingOrder(order);
     setIsTrackingOpen(true);
   };
 
-  // Close tracking modal
   const closeTracking = () => setIsTrackingOpen(false);
 
-  // ----- Static timeline for now -----
-  const timeline = [
-    { label: "Ordered", active: true },
-    { label: "Packed", active: false },
-    { label: "Delivery Partner Assigned", active: false },
-    { label: "In Transit", active: false },
-    { label: "Out for Delivery", active: false },
-    { label: "Delivered", active: false }
+  // Tracking steps (static for now)
+  const steps = [
+    "Ordered",
+    "Packed",
+    "Delivery Partner Assigned",
+    "In Transit",
+    "Out for Delivery",
+    "Delivered",
   ];
 
   return (
@@ -48,53 +46,76 @@ const Orders = () => {
         <Title text1="YOUR" text2="ORDERS" />
       </div>
 
-      {/* ------------------ ORDERS LIST ------------------ */}
       {orders.length === 0 ? (
         <p className="mt-8 text-gray-500">No orders yet.</p>
       ) : (
         orders.map((order) => (
-          <div key={order._id} className="flex flex-col gap-4 py-4 text-gray-700 border-t border-b">
+          <div
+            key={order._id}
+            className="flex flex-col gap-4 py-4 text-gray-700 border-t border-b"
+          >
             {order.items.map((item, i) => (
-              <div key={i} className="flex flex-col md:flex-row md:items-center md:justify-between">
-
-                {/* LEFT SECTION */}
-                <div className="flex items-start gap-6 text-sm">
-                  <img className="w-16 sm:w-20 rounded-md" src={item.image} alt={item.name} />
+              <div
+                key={i}
+                className="flex flex-col md:flex-row md:items-center md:justify-between cursor-pointer"
+              >
+                {/* LEFT AREA — Navigate to Product */}
+                <div
+                  className="flex items-start gap-6 text-sm"
+                  onClick={() =>
+                    (window.location.href = `/product/${item.productId}`)
+                  }
+                >
+                  <img
+                    className="w-16 sm:w-20"
+                    src={item.image}
+                    alt={item.name}
+                  />
                   <div>
                     <p className="font-medium sm:text-base">{item.name}</p>
-                    <p className="text-lg">{currency}{item.price.toFixed(2)}</p>
+                    <p className="text-lg">
+                      {currency}
+                      {item.price.toFixed(2)}
+                    </p>
                     <p>Quantity: {item.quantity}</p>
                     <p>Size: {item.size}</p>
-
                     <p className="mt-2 text-gray-400">
                       Date: {new Date(order.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                 </div>
 
-                {/* RIGHT SECTION */}
-                <div className="flex justify-between md:w-1/2">
+                {/* RIGHT AREA */}
+                <div className="flex justify-between md:w-1/2 mt-4 md:mt-0">
                   <div className="flex items-center gap-2">
-                    <p className="h-2 bg-green-500 rounded-full min-w-2"></p>
+                    <div className="relative">
+                      <span className="h-2 w-2 block bg-green-500 rounded-full"></span>
+
+                      {/* glow animation */}
+                      <span className="absolute inset-0 h-2 w-2 bg-green-400 rounded-full animate-ping opacity-60"></span>
+                    </div>
+
                     <p className="text-sm md:text-base">{order.status}</p>
                   </div>
 
                   {/* TRACK ORDER BUTTON */}
                   <button
-                    onClick={() => openTracking(order)}
-                    className="px-4 py-2 text-sm font-medium border rounded-md hover:bg-gray-100"
+                    onClick={(e) => {
+                      e.stopPropagation(); // PREVENT opening product
+                      openTracking(order);
+                    }}
+                    className="px-4 py-2 text-sm font-medium border rounded-sm hover:bg-gray-100"
                   >
                     TRACK ORDER
                   </button>
                 </div>
-
               </div>
             ))}
           </div>
         ))
       )}
 
-      {/* ------------------ TRACKING SLIDE-UP PANEL ------------------ */}
+      {/* ------------------ BOTTOM SHEET TRACKING ------------------ */}
       {isTrackingOpen && (
         <>
           {/* BACKDROP */}
@@ -103,72 +124,68 @@ const Orders = () => {
             className="fixed inset-0 bg-black bg-opacity-40 z-40"
           ></div>
 
-          {/* BOTTOM SHEET */}
+          {/* SHEET */}
           <div
             className="
               fixed left-0 right-0 bottom-0 
-              bg-white rounded-t-xl shadow-xl z-50
-              p-6 
+              bg-white rounded-t-2xl shadow-xl 
+              z-50 p-6 h-[45vh]
               animate-slideUp
-              h-[45vh]
-              flex flex-col
             "
           >
             {/* HEADER */}
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Order Tracking</h2>
-              <button
-                onClick={closeTracking}
-                className="text-2xl font-bold text-gray-700 hover:text-black"
-              >
-                ×
+            <div className="flex justify-between items-center mb-3">
+              <h2 className="text-xl font-semibold text-black">Order Tracking</h2>
+              <button onClick={closeTracking}>
+                <span className="text-2xl font-bold text-black">×</span>
               </button>
             </div>
 
-            <p className="text-gray-600 text-sm mb-4">
-              Order ID: <span className="font-semibold">{trackingOrder?._id}</span>
+            <p className="text-gray-600 text-sm">
+              Order ID: {trackingOrder?._id}
             </p>
 
             {/* TIMELINE */}
-            <div className="mt-2 space-y-3 overflow-y-auto pb-2">
-              {timeline.map((step, idx) => (
-                <div key={idx} className="flex items-start gap-4">
-                  
-                  {/* BULLET */}
-                  <div
-                    className={`
-                      w-3 h-3 rounded-full mt-1
-                      ${step.active ? "bg-green-600" : "bg-gray-300"}
-                    `}
-                  ></div>
+            <div className="mt-6 flex gap-6">
+              {/* VERTICAL LINE */}
+              <div className="relative">
+                <div className="absolute top-0 bottom-0 w-[3px] bg-black left-[7px]"></div>
 
-                  {/* STEP LABEL */}
-                  <p
-                    className={`
-                      text-sm font-medium
-                      ${step.active ? "text-black" : "text-gray-500"}
-                    `}
-                  >
-                    {step.label}
-                  </p>
-                </div>
-              ))}
+                {/* Steps */}
+                {steps.map((label, index) => (
+                  <div key={index} className="flex items-start gap-4 relative mb-6">
+                    <div className="relative">
+                      <div className="w-4 h-4 bg-black rounded-full"></div>
+
+                      {index === 0 && (
+                        <span className="absolute inset-0 w-4 h-4 bg-red-500 rounded-full animate-ping opacity-60"></span>
+                      )}
+                    </div>
+
+                    <p className="text-sm font-medium text-black">{label}</p>
+                  </div>
+                ))}
+              </div>
             </div>
 
+            {/* CLOSE BUTTON */}
+            <button
+              onClick={closeTracking}
+              className="w-full mt-4 py-3 bg-black text-white rounded-lg"
+            >
+              Close
+            </button>
           </div>
 
-          {/* Bottom sheet animation */}
-          <style>
-            {`
-              @keyframes slideUp {
-                from { transform: translateY(100%); }
-                to { transform: translateY(0); }
-              }
-              .animate-slideUp {
-                animation: slideUp 0.35s ease-out;
-              }
-            `}
-          </style>
+          <style>{`
+            @keyframes slideUp {
+              from { transform: translateY(100%); }
+              to { transform: translateY(0); }
+            }
+            .animate-slideUp {
+              animation: slideUp .35s ease-out;
+            }
+          `}</style>
         </>
       )}
     </div>
