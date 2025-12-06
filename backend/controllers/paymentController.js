@@ -1,8 +1,12 @@
 import crypto from "crypto";
 import razorpayInstance from "../config/razorpay.js";
 import Order from "../models/orderModel.js";
+import Product from "../models/productModel.js"; // <-- added for stock update
 import { createShiprocketOrder } from "../utils/shiprocket.js";
 
+// =======================================================================
+// CREATE RAZORPAY ORDER
+// =======================================================================
 export const createRazorpayOrder = async (req, res) => {
   try {
     const { amount } = req.body;
@@ -11,7 +15,7 @@ export const createRazorpayOrder = async (req, res) => {
     }
 
     const options = {
-      amount, // in paise
+      amount,
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
     };
@@ -24,6 +28,9 @@ export const createRazorpayOrder = async (req, res) => {
   }
 };
 
+// =======================================================================
+// VERIFY PAYMENT + SAVE ORDER + SHIPROCKET + UPDATE STOCK
+// =======================================================================
 export const verifyRazorpayPayment = async (req, res) => {
   try {
     const {
@@ -33,9 +40,12 @@ export const verifyRazorpayPayment = async (req, res) => {
       items,
       address,
       totalAmount,
+      deliveryFee,
     } = req.body;
 
-    // Step 1: Signature verification
+    // -------------------------------------------------------------
+    // SIGNATURE VERIFICATION
+    // -------------------------------------------------------------
     const body = razorpay_order_id + "|" + razorpay_payment_id;
     const expectedSignature = crypto
       .createHmac("sha256", process.env.RAZORPAY_TEST_SECRET)
@@ -46,7 +56,9 @@ export const verifyRazorpayPayment = async (req, res) => {
       return res.status(400).json({ success: false, message: "Signature mismatch" });
     }
 
-    // Step 2: Save Order
+    // -------------------------------------------------------------
+    // SAVE ORDER IN DB
+    // -------------------------------------------------------------
     const newOrder = await Order.create({
       userId: req.user?.id || null,
       items: items.map((item) => ({
@@ -60,6 +72,7 @@ export const verifyRazorpayPayment = async (req, res) => {
       address,
       paymentMethod: "razorpay",
       totalAmount,
+      deliveryFee,
       status: "Paid",
       razorpayOrderId: razorpay_order_id,
       razorpayPaymentId: razorpay_payment_id,
@@ -67,11 +80,24 @@ export const verifyRazorpayPayment = async (req, res) => {
 
     console.log("✅ Razorpay order created:", newOrder._id);
 
-    // ✅ Build Shiprocket payload (identical to COD)
+    // -------------------------------------------------------------
+    // OPTIONAL: AUTO MARK SOLDOUT (same as COD logic)
+    // Uncomment if each product has only **1 piece**
+    // -------------------------------------------------------------
+    for (const item of items) {
+      await Product.findByIdAndUpdate(item.productId, {
+        soldOut: true,
+      });
+    }
+
+    // -------------------------------------------------------------
+    // SHIPROCKET SYNC
+    // -------------------------------------------------------------
     const payload = {
       order_id: `ORDER-${newOrder._id.toString()}`,
       order_date: new Date().toISOString().slice(0, 19).replace("T", " "),
       pickup_location: "Home",
+
       billing_customer_name: address.firstName,
       billing_last_name: address.lastName,
       billing_address: address.street,
@@ -81,14 +107,17 @@ export const verifyRazorpayPayment = async (req, res) => {
       billing_country: address.country || "India",
       billing_email: address.email,
       billing_phone: address.mobile,
+
       shipping_is_billing: true,
+
       order_items: items.map((i) => ({
         name: i.name,
         sku: i.productId?.toString?.() || i.productId,
         units: i.quantity,
         selling_price: i.price,
       })),
-      payment_method: "Prepaid", // ✅ Razorpay always prepaid
+
+      payment_method: "Prepaid",
       sub_total: totalAmount,
       length: 10,
       breadth: 10,
@@ -96,7 +125,6 @@ export const verifyRazorpayPayment = async (req, res) => {
       weight: 1,
     };
 
-    // ✅ Send to Shiprocket
     createShiprocketOrder(payload).catch((err) =>
       console.error("❌ Shiprocket sync failed:", err.response?.data || err.message)
     );
