@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Form } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
 
@@ -29,6 +29,7 @@ const Login = () => {
     try {
       const endpoint =
         mode === "Login" ? "/api/user/login" : "/api/user/register";
+        
 
       const res = await fetch(`http://localhost:4000${endpoint}`, {
         method: "POST",
