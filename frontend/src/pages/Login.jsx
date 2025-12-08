@@ -4,53 +4,50 @@ import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
 
 const Login = () => {
-  const [currentState, setCurrentState] = useState("Login");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
-  const returnTo = location.state?.from || "/";
 
-  const handleSubmit = async (e) => {
+  const redirect =
+    new URLSearchParams(location.search).get("redirect") || "/";
+
+  const [mode, setMode] = useState("Login");
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+  const [loading, setLoading] = useState(false);
+
+  const inputHandler = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
+
+  const submitHandler = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
       const endpoint =
-        currentState === "Login"
-          ? `${import.meta.env.VITE_PORT}/user/login`
-          : `${import.meta.env.VITE_PORT}/user/register`;
+        mode === "Login" ? "/api/user/login" : "/api/user/register";
 
-      const body =
-        currentState === "Login"
-          ? { email, password }
-          : { name, email, password };
-
-      const res = await fetch(endpoint, {
+      const res = await fetch(`http://localhost:4000${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify(form),
       });
 
       const data = await res.json();
-
-      if (!res.ok) {
-        toast.error(data.message || "Login failed");
+      if (!data.success) {
+        toast.error(data.message);
         setLoading(false);
         return;
       }
 
-      // MUST EXIST FROM BACKEND
       login(data.token, data.user);
+      toast.success(`${mode} Successful`);
 
-      toast.success("Logged in");
-
-      navigate(returnTo, { replace: true });
-    } catch (err) {
+      navigate(redirect); // redirect to previous page
+    } catch {
       toast.error("Network error");
     }
 
@@ -59,56 +56,57 @@ const Login = () => {
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={submitHandler}
       className="flex flex-col items-center w-[90%] sm:max-w-96 m-auto mt-14 gap-4 text-gray-800"
+      autoComplete="on"
     >
-      <div className="inline-flex items-center gap-2 mt-10 mb-2">
-        <p className="text-3xl prata-regular">{currentState}</p>
-        <hr className="border-none h-[1.5px] w-8 bg-gray-800" />
-      </div>
+      <h2 className="text-3xl mt-10">{mode}</h2>
 
-      {currentState !== "Login" && (
+      {mode === "Sign Up" && (
         <input
-          type="text"
+          name="name"
+          value={form.name}
+          onChange={inputHandler}
+          placeholder="Your Name"
           className="w-full px-3 py-2 border border-gray-800"
-          placeholder="John Doe"
-          onChange={(e) => setName(e.target.value)}
-          required
+          autoComplete="name"
         />
       )}
 
       <input
+        name="email"
         type="email"
+        value={form.email}
+        onChange={inputHandler}
+        placeholder="Email"
         className="w-full px-3 py-2 border border-gray-800"
-        placeholder="hello@gmail.com"
-        onChange={(e) => setEmail(e.target.value)}
-        required
+        autoComplete="email"
       />
 
       <input
+        name="password"
         type="password"
-        className="w-full px-3 py-2 border border-gray-800"
+        value={form.password}
+        onChange={inputHandler}
         placeholder="Password"
-        onChange={(e) => setPassword(e.target.value)}
-        required
+        className="w-full px-3 py-2 border border-gray-800"
+        autoComplete={mode === "Login" ? "current-password" : "new-password"}
       />
 
       <button
         disabled={loading}
-        className="px-8 py-2 mt-4 font-light text-white bg-black"
+        className="w-full px-8 py-2 mt-4 text-white bg-black"
       >
-        {loading ? "Processing..." : currentState === "Login" ? "Sign In" : "Sign Up"}
+        {loading ? "Processing..." : mode}
       </button>
 
       <p
-        onClick={() =>
-          setCurrentState(currentState === "Login" ? "Sign Up" : "Login")
-        }
-        className="cursor-pointer text-sm mt-[-8px]"
+        className="text-sm cursor-pointer"
+        onClick={() => setMode(mode === "Login" ? "Sign Up" : "Login")}
       >
-        {currentState === "Login"
-          ? "Create a new account"
-          : "Login here"}
+        {mode === "Login"
+          ? "Create new account"
+          : "Already have an account? Login"}
       </p>
     </form>
   );

@@ -4,7 +4,7 @@ dotenv.config();
 
 // --- MODEL CONFIGURATION ---
 // Note: This model (imagen-3.0-generate-002) is generally a paid service.
-const MODEL_IMAGE = process.env.GEMINI_IMAGE_MODEL || "gemini-2.5-flash-image"; // Try this if 3.0 fails.
+const MODEL_IMAGE = process.env.GEMINI_IMAGE_MODEL || "gemini-2.5-flash-image-preview"; // Try this if 3.0 fails.
 const API_KEY = process.env.GOOGLE_API_KEY;
 
 if (!API_KEY) {
