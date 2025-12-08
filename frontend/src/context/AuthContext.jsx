@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 
 export const AuthContext = createContext();
 
@@ -8,16 +8,16 @@ export const AuthProvider = ({ children }) => {
     JSON.parse(localStorage.getItem("user")) || null
   );
 
-  // 🔥 AUTO LOGIN FIX — restore token + user on refresh
+  // Restore user on refresh
   useEffect(() => {
     const savedToken = localStorage.getItem("token");
     const savedUser = localStorage.getItem("user");
 
-    if (savedToken && !token) setToken(savedToken);
-    if (savedUser && !user) setUser(JSON.parse(savedUser));
+    if (savedToken) setToken(savedToken);
+    if (savedUser) setUser(JSON.parse(savedUser));
   }, []);
 
-  // LOGIN FUNCTION
+  // Login
   const login = (tokenValue, userData) => {
     localStorage.setItem("token", tokenValue);
     localStorage.setItem("user", JSON.stringify(userData));
@@ -26,11 +26,10 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
   };
 
-  // LOGOUT FUNCTION
+  // Logout (clears all user session data)
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-
     setToken(null);
     setUser(null);
   };

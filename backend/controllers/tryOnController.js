@@ -12,44 +12,44 @@ if (!API_KEY) {
 }
 
 // --- New Utility Function to List Models ---
-const listAvailableModels = async () => {
-    console.log("--- Fetching Available Models ---");
-    const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`;
+// const listAvailableModels = async () => {
+//     console.log("--- Fetching Available Models ---");
+//     const listUrl = `https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`;
     
-    try {
-        const res = await fetch(listUrl);
-        const data = await res.json();
+//     try {
+//         const res = await fetch(listUrl);
+//         const data = await res.json();
         
-        if (data.error) {
-            console.error("Error listing models:", data.error.message);
-            return [];
-        }
+//         if (data.error) {
+//             console.error("Error listing models:", data.error.message);
+//             return [];
+//         }
 
-        // Filter for models that support the generateContent method
-        const supportedModels = data.models.filter(model => 
-            model.supportedGenerationMethods.includes("generateContent")
-        );
+//         // Filter for models that support the generateContent method
+//         const supportedModels = data.models.filter(model => 
+//             model.supportedGenerationMethods.includes("generateContent")
+//         );
 
-        console.log("Total models supporting generateContent:", supportedModels.length);
+//         console.log("Total models supporting generateContent:", supportedModels.length);
 
-        // Map and log only the essential info
-        const modelNames = supportedModels.map(model => ({
-            name: model.name,
-            version: model.version,
-            description: model.description,
-            methods: model.supportedGenerationMethods.join(', ')
-        }));
+//         // Map and log only the essential info
+//         const modelNames = supportedModels.map(model => ({
+//             name: model.name,
+//             version: model.version,
+//             description: model.description,
+//             methods: model.supportedGenerationMethods.join(', ')
+//         }));
 
-        console.table(modelNames);
-        return supportedModels;
+//         console.table(modelNames);
+//         return supportedModels;
         
-    } catch (err) {
-        console.error("Network error during ListModels call:", err);
-        return [];
-    }
-};
+//     } catch (err) {
+//         console.error("Network error during ListModels call:", err);
+//         return [];
+//     }
+// };
 
-await listAvailableModels();
+// await listAvailableModels();
 
 // Helper: simple backoff fetch
 const fetchWithBackoff = async (url, options, retries = 3) => {

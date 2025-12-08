@@ -416,7 +416,7 @@ const TryOn = () => {
               onClick={handleGenerate}
               disabled={loading || !userImage}
               className={`w-full py-6 font-black text-sm uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-3 border-2 border-black ${
-                loading ? "bg-white text-black cursor-wait" : !userImage ? "bg-zinc-100 text-zinc-400 border-zinc-200 cursor-not-allowed" : "bg-black text-white hover:bg-white hover:text-black"
+                loading ? "bg-white text-black cursor-wait" : !userImage ? "bg-zinc-100 text-zinc-400 border-zinc-200 cursor-not-allowed" : "from-yellow-600 to-purple-600 text-white hover:bg-white hover:text-black"
               }`}
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}

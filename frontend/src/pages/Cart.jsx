@@ -88,12 +88,12 @@ const Cart = () => {
                   value={item.quantity}
                   onChange={(e) => {
                     const inputValue = e.target.value.trim();
-                    
+
                     // If empty, do nothing (user is still typing)
                     if (inputValue === "") return;
-                    
+
                     const value = Number(inputValue);
-                    
+
                     // Only update if it's a valid positive number
                     if (value >= 1) {
                       updateCartItem(item._id, item.size, value);
@@ -138,11 +138,15 @@ const Cart = () => {
               Shipping fee calculated at checkout
             </p>
             <button
-              onClick={() => navigate("/place-order")}
-              className="px-8 py-3 mt-4 text-sm text-white bg-black hover:bg-gray-800"
+              onClick={() => {
+                if (!localStorage.getItem("token")) return navigate("/login");
+                navigate("/place-order");
+              }}
+              className="px-8 py-3 mt-4 text-white bg-black"
             >
               PROCEED TO CHECKOUT
             </button>
+
           </div>
         </div>
       )}
