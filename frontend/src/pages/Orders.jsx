@@ -24,7 +24,7 @@ const Orders = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://13.203.214.92/api/order/user", {
+      const res = await fetch(`${import.meta.env.VITE_PORT}/order/user`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();

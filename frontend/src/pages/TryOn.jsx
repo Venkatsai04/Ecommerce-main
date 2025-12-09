@@ -215,7 +215,7 @@ const TryOn = () => {
         productCategory: product?.category || product?.subCategory || "",
       };
 
-      const resp = await fetch("http://13.203.214.92/api/tryon", {
+      const resp = await fetch(`${import.meta.env.VITE_PORT}/tryon`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

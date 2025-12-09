@@ -28,10 +28,10 @@ const Login = () => {
 
     try {
       const endpoint =
-        mode === "Login" ? "/api/user/login" : "/api/user/register";
+        mode === "Login" ? "/user/login" : "/user/register";
         
 
-      const res = await fetch(`http://13.203.214.92/${endpoint}`, {
+      const res = await fetch(`${import.meta.env.VITE_PORT}/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

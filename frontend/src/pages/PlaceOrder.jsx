@@ -6,7 +6,7 @@ import CartTotal from "../components/CartTotal";
 import { assets } from "../assets/assets";
 import { ShopContext } from "../context/ShopContext";
 
-const backendUrl = "http://13.203.214.92/api";
+const backendUrl = import.meta.env.VITE_PORT;
 
 const PlaceOrder = () => {
   const {
