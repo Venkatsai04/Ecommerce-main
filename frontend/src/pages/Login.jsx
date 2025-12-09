@@ -28,7 +28,7 @@ const Login = () => {
 
     try {
       const endpoint =
-        mode === "Login" ? "/user/login" : "/user/register";
+        mode === "Login" ? "user/login" : "user/register";
         
 
       const res = await fetch(`${import.meta.env.VITE_PORT}/${endpoint}`, {

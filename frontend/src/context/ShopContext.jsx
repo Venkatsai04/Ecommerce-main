@@ -17,7 +17,7 @@ const ShopContextProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
   const [cartItems, setCartItems] = useState({});
   const currency = "₹";
-
+ 
   // FETCH PRODUCTS
   useEffect(() => {
     axios.get(`${backendUrl}/product/list`)
