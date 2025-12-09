@@ -19,7 +19,7 @@ import { assets } from "../assets/assets";
 
 /*
   FULL TRYON PAGE (original UI preserved)
-  - All Gemini / AI logic moved to backend at: http://localhost:4000/api/tryon
+  - All Gemini / AI logic moved to backend at: api/tryon
   - Frontend now only:
     1) loads product image -> base64 (garmentImage)
     2) accepts user's upload -> base64 (userImage)
@@ -193,7 +193,7 @@ const TryOn = () => {
   };
 
   // THIS is the only function that calls the backend.
-  // Backend endpoint: http://localhost:4000/api/tryon
+  
   const handleGenerate = async () => {
     if (!userImage || !garmentImage) {
       setError("Please upload your photo.");
@@ -215,7 +215,7 @@ const TryOn = () => {
         productCategory: product?.category || product?.subCategory || "",
       };
 
-      const resp = await fetch("http://localhost:4000/api/tryon", {
+      const resp = await fetch("http://13.203.214.92/api/tryon", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

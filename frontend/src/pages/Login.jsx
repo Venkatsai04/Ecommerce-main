@@ -31,7 +31,7 @@ const Login = () => {
         mode === "Login" ? "/api/user/login" : "/api/user/register";
         
 
-      const res = await fetch(`http://localhost:4000${endpoint}`, {
+      const res = await fetch(`http://13.203.214.92/${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

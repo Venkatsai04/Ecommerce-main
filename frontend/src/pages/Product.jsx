@@ -37,7 +37,7 @@ const Product = () => {
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const res = await fetch(`http://localhost:4000/api/reviews/${productId}`);
+        const res = await fetch(`http://13.203.214.92/api/reviews/${productId}`);
         const data = await res.json();
         setReviews(data.reviews || []);
       } catch (err) {
@@ -52,7 +52,7 @@ const Product = () => {
     if (!newReview) return alert("Please write a review.");
 
     try {
-      const res = await fetch(`http://localhost:4000/api/reviews/${productId}`, {
+      const res = await fetch(`http://13.203.214.92/api/reviews/${productId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -82,7 +82,7 @@ const Product = () => {
     setDeliveryInfo(null);
 
     try {
-      const res = await axios.post("http://localhost:4000/api/shipping/check-pincode", { pincode });
+      const res = await axios.post("http://13.203.214.92/api/shipping/check-pincode", { pincode });
       setDeliveryInfo(res.data);
     } catch (err) {
       console.error(err);
