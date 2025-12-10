@@ -33,6 +33,8 @@ const Product = () => {
     const product = products.find((item) => item._id === productId);
     if (product) {
       setProductData(product);
+      console.log(productData);
+      
       setImage(product.image[0]);
     }
   }, [productId, products]);

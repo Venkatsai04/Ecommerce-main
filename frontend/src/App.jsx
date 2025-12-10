@@ -21,16 +21,18 @@ import Profile from './pages/Profile'
 import PaymentSuccess from './pages/PaymentSucces'
 import TryOn from './pages/TryOn'
 import WinterChills from './components/WinterChills'
+import ReturnsPolicy from './pages/ReturnsPolicy'
+import ForgotPassword from './pages/ForgotPassword'
 
 const App = () => {
   return (
     <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
       {/* <DiwaliFirework /> */}
-      <WinterChills/>
+      <WinterChills />
       <ToastContainer />
       <NavBar />
       <SearchBar />
-      <ScrollToTop/>
+      <ScrollToTop />
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/collection' element={<Collection />} />
@@ -42,9 +44,12 @@ const App = () => {
         <Route path='/place-order' element={<PlaceOrder />} />
         <Route path='/orders' element={<Orders />} />
         <Route path='/privacy-policy' element={<PrivacyPolicy />} />
-        <Route path='/Profile' element={<Profile/>} />
-         <Route path="/payment-success" element={<PaymentSuccess />} />
-         <Route path="/try-on" element={<TryOn/>} />
+        <Route path='/Profile' element={<Profile />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/try-on" element={<TryOn />} />
+        <Route path="/returns" element={<ReturnsPolicy/>} />
+        <Route path="/reset-password" element={<ForgotPassword/>} />
+
       </Routes>
       <Footer />
     </div>

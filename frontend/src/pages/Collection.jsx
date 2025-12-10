@@ -9,8 +9,9 @@ const Collection = () => {
   const [filtered, setFiltered] = useState([]);
 
   // filters
-  const [selectedTypes, setSelectedTypes] = useState([]); // Hoodie, Jacket etc.
-  const [selectedSizes, setSelectedSizes] = useState([]); // ["S","M"]
+  const [selectedTypes, setSelectedTypes] = useState([]);
+  const [selectedSizes, setSelectedSizes] = useState([]);
+  const [selectedGender, setSelectedGender] = useState([]); // NEW FILTER
   const [sortType, setSortType] = useState("relevant");
 
   const [sortOpen, setSortOpen] = useState(false);
@@ -29,7 +30,14 @@ const Collection = () => {
   const applyFilter = () => {
     let copy = [...products];
 
-    // filter by product type (subCategory)
+    // Filter by gender
+    if (selectedGender.length > 0) {
+      copy = copy.filter((item) =>
+        selectedGender.includes(item.category) // item.category = "Men", "Women"
+      );
+    }
+
+    // filter by product type
     if (selectedTypes.length > 0) {
       copy = copy.filter((item) =>
         selectedTypes.includes(item.subCategory)
@@ -59,9 +67,10 @@ const Collection = () => {
   const clearFilters = () => {
     setSelectedTypes([]);
     setSelectedSizes([]);
+    setSelectedGender([]); // reset gender too
   };
 
-  useEffect(() => applyFilter(), [products, selectedTypes, selectedSizes]);
+  useEffect(() => applyFilter(), [products, selectedTypes, selectedSizes, selectedGender]);
   useEffect(() => applySort(), [sortType]);
 
   return (
@@ -69,9 +78,8 @@ const Collection = () => {
 
       {/* HEADER */}
       <div className="flex justify-between items-center mb-5">
-        <Title text1="MEN'S" text2="COLLECTION" />
+        <Title text1="OUR" text2="COLLECTION" />
 
-        {/* Clean outer button */}
         <button
           onClick={() => setFilterOpen(true)}
           className="px-3 py-2 rounded-md bg-gray-100 text-sm text-gray-700"
@@ -80,7 +88,7 @@ const Collection = () => {
         </button>
       </div>
 
-      {/* SORT BOX (outer clean, inner thin borders) */}
+      {/* SORT DROPDOWN */}
       <div className="relative w-full">
         <div
           onClick={() => setSortOpen(!sortOpen)}
@@ -100,7 +108,6 @@ const Collection = () => {
         {sortOpen && (
           <div className="absolute left-0 w-full bg-white border border-gray-300 
                           rounded-md mt-1 z-20">
-
             <button
               onClick={() => {
                 setSortType("relevant");
@@ -165,17 +172,36 @@ const Collection = () => {
               <button onClick={() => setFilterOpen(false)}>✕</button>
             </div>
 
-            {/* TYPE FILTER */}
-            <p className="text-sm font-medium text-gray-700">Product Type</p>
+            {/* GENDER FILTER */}
+            <p className="text-sm font-medium text-gray-700">Gender</p>
+            <div className="flex gap-2 mt-2">
+              {["Men", "Women"].map((g) => (
+                <button
+                  key={g}
+                  onClick={() => toggle(g, setSelectedGender, selectedGender)}
+                  className={`
+                    px-3 py-1 text-sm border rounded border-gray-400
+                    ${
+                      selectedGender.includes(g)
+                        ? "bg-black text-white"
+                        : "bg-white text-gray-800"
+                    }
+                  `}
+                >
+                  {g}
+                </button>
+              ))}
+            </div>
 
+            {/* PRODUCT TYPE FILTER */}
+            <p className="text-sm font-medium text-gray-700 mt-5">Product Type</p>
             <div className="flex flex-wrap gap-2 mt-2">
               {["Hoodie", "Zipper", "Jacket", "Wind Jacket", "Vintage"].map((t) => (
                 <button
                   key={t}
                   onClick={() => toggle(t, setSelectedTypes, selectedTypes)}
                   className={`
-                    px-3 py-1 text-sm 
-                    border rounded border-gray-400 
+                    px-3 py-1 text-sm border rounded border-gray-400
                     ${
                       selectedTypes.includes(t)
                         ? "bg-black text-white"
@@ -190,15 +216,13 @@ const Collection = () => {
 
             {/* SIZE FILTER */}
             <p className="text-sm font-medium text-gray-700 mt-5">Sizes</p>
-
             <div className="flex gap-2 mt-2">
               {["S", "M", "L", "XL", "XXL"].map((s) => (
                 <button
                   key={s}
                   onClick={() => toggle(s, setSelectedSizes, selectedSizes)}
                   className={`
-                    px-3 py-1 text-sm 
-                    border rounded border-gray-400 
+                    px-3 py-1 text-sm border rounded border-gray-400
                     ${
                       selectedSizes.includes(s)
                         ? "bg-black text-white"

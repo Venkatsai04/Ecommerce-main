@@ -6,7 +6,7 @@ import { AuthContext } from '../context/AuthContext';  // <-- added this
 
 const NavBar = () => {
   const [visible, setVisible] = useState(false);
-  const { setShowSearch, getCartCount } = useContext(ShopContext);
+  const { getCartCount } = useContext(ShopContext);
   const { user, logout } = useContext(AuthContext); // <-- use global auth
   const navigate = useNavigate();
 
@@ -38,11 +38,11 @@ const NavBar = () => {
 
       <div className="flex items-center gap-6">
 
-        <img
+        {/* <img
           onClick={() => setShowSearch(true)}
           src={assets.search_icon}
           className="w-5 cursor-pointer hover:opacity-70 transition"
-        />
+        /> */}
 
         {/* Profile icon */}
         <div>

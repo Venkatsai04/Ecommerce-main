@@ -12,7 +12,7 @@ const Profile = () => {
   };
 
   const handleChangePassword = () => {
-    navigate("/change-password"); // redirect to a change password page
+    navigate("/reset-password"); // redirect to a change password page
   };
 
   return (
