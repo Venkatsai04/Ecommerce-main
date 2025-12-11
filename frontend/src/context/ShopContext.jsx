@@ -67,6 +67,8 @@ const ShopContextProvider = ({ children }) => {
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
+    navigate("/cart")
+
     setCartItems((prev) => {
       const updated = { ...prev };
       if (!updated[productId]) updated[productId] = {};

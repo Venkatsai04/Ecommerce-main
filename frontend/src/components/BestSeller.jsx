@@ -15,10 +15,10 @@ const BestSeller = () => {
 
   return (
     <section className="bg-white py-14">
-      <div className="text-center mb-10">
-        <Title text1="BEST" text2="SELLERS" />
-        <p className="w-4/5 md:w-2/3 lg:w-1/2 mx-auto mt-2 text-sm md:text-base text-gray-600">
-          Explore our most-loved products — handpicked for their quality, elegance, and popularity among Sahara shoppers.
+         <div className="py-8 text-3xl text-center">
+         <Title text1={"TOPPERS IN THE "} text2={"BATCH"} />
+        <p className="w-3/4 m-auto text-xs text-gray-600 sm:text-sm md:text-base">
+         Explore our most-loved products — handpicked for their quality, elegance, and popularity among Sahara shoppers.
         </p>
       </div>
 

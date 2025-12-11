@@ -207,6 +207,7 @@ const Product = () => {
                 onClick={() => {
                   if (!size) return alert("Please select a size");
                   addToCart(productData._id, size);
+                  
                 }}
                 className="px-8 py-3 text-sm text-white bg-black active:bg-gray-700"
               >
