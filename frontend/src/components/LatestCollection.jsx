@@ -35,6 +35,16 @@ useEffect(() => {
           />
         ))}
       </div>
+
+      <div className="flex justify-center mt-12">
+              <Link to="/collection">
+                <button className="bg-black text-white px-8 py-3 text-sm md:text-base font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300">
+                  View All Products
+                </button>
+              </Link>
+            </div>
+      
+
     </div>
   );
 };
