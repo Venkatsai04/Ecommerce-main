@@ -198,7 +198,7 @@ const PlaceOrder = () => {
       );
 
       const options = {
-        key: "rzp_test_RU9gYhxqiyBnDV",
+        key: import.meta.env.VITE_RAZORPAY_KEY,
         amount: data.order.amount,
         currency: "INR",
         name: "Sahara Traders",
