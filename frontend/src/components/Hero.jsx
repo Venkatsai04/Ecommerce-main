@@ -16,7 +16,7 @@ const DRAG_FACTOR = 0.2;
 
 // High-Res Fashion Imagery
 const BASE_IMAGES = [
-  { src: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=600&auto=format&fit=crop", label: "Avant Garde" },
+  { src: "/hippo.jpg", label: "Avant Garde" },
   { src: "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=600&auto=format&fit=crop", label: "Neo Tokyo" },
   { src: "https://images.unsplash.com/photo-1617137968427-85924c809a10?q=80&w=600&auto=format&fit=crop", label: "Structure" },
   { src: "https://images.unsplash.com/photo-1529139574466-a302d2d3f524?q=80&w=600&auto=format&fit=crop", label: "Ethereal" },
@@ -154,7 +154,7 @@ const Cylinder3D = ({ skipEntrance }) => {
                       src={item.src}
                       alt={item.label}
                       // UPDATED: Changed opacity-90 to opacity-60 for lower initial opacity
-                      className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all duration-500 grayscale-[50%] group-hover:grayscale-0"
+                      className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-all duration-500 grayscale-[50%] group-hover:grayscale-0"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="absolute bottom-6 left-0 right-0 text-center transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
