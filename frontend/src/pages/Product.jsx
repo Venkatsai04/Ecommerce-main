@@ -34,7 +34,7 @@ const Product = () => {
     if (product) {
       setProductData(product);
       console.log(productData);
-      
+
       setImage(product.image[0]);
     }
   }, [productId, products]);
@@ -204,15 +204,19 @@ const Product = () => {
               </button>
             ) : (
               <button
-                onClick={() => {
+                onClick={async () => {
                   if (!size) return alert("Please select a size");
-                  addToCart(productData._id, size);
-                  
+
+                  await addToCart(productData._id, size);  // wait for backend update
+
+                  // ⭐ Redirect to cart after successful add
+                  navigate("/cart");
                 }}
                 className="px-8 py-3 text-sm text-white bg-black active:bg-gray-700"
               >
                 ADD TO CART
               </button>
+
             )}
 
             {/* Try On */}

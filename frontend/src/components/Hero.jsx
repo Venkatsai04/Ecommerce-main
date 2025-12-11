@@ -1,7 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
 import { motion, useSpring, useMotionValue, useAnimationFrame } from "framer-motion";
-import { MoveRight, Play } from "lucide-react";
-import { useNavigate } from "react-router-dom"; // Added useNavigate
+import { MoveRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+// --- GLOBAL STATE ---
+// This variable sits outside the component lifecycle.
+// It persists when you navigate to other pages (e.g. /collection),
+// but resets to 'false' if the user hits the browser Refresh button.
+let hasIntroAnimated = false;
 
 // --- CONFIGURATION ---
 const INITIAL_CYLINDER_SPEED = 3.5;
@@ -69,7 +75,7 @@ const Preloader = ({ onComplete }) => {
 };
 
 // --- COMPONENT: 3D CYLINDER ---
-const Cylinder3D = () => {
+const Cylinder3D = ({ skipEntrance }) => {
   const [isHovered, setIsHovered] = useState(false);
   const currentSpeed = useRef(INITIAL_CYLINDER_SPEED);
   const rotation = useMotionValue(0);
@@ -89,13 +95,11 @@ const Cylinder3D = () => {
   });
 
   const PANEL_WIDTH = 200;
-  const PANEL_HEIGHT = 300;
+  const PANEL_HEIGHT = 360;
   const COUNT = ITEMS.length;
   const RADIUS = (PANEL_WIDTH / 2) / Math.tan(Math.PI / COUNT) + 15;
 
   return (
-    // UPDATED: Changed div to motion.div and moved pan/touch handlers here
-    // touchAction: "pan-y" allows vertical scroll but captures horizontal swipes for rotation
     <motion.div
       className="perspective-container w-full h-full flex items-center justify-center relative select-none cursor-grab active:cursor-grabbing"
       style={{ touchAction: "pan-y" }}
@@ -118,9 +122,9 @@ const Cylinder3D = () => {
       `}</style>
 
       <motion.div
-        initial={{ rotateX: 30, scale: 0.7, opacity: 0, y: 100 }}
+        initial={skipEntrance ? { rotateX: 0, scale: 1, opacity: 1, y: 0 } : { rotateX: 30, scale: 0.7, opacity: 0, y: 100 }}
         animate={{ rotateX: 0, scale: 1, opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.2 }}
+        transition={{ type: "spring", stiffness: 100, damping: 20, delay: skipEntrance ? 0 : 0.2 }}
         className="cylinder-stage w-0 h-0 relative"
       >
         <motion.div
@@ -144,19 +148,15 @@ const Cylinder3D = () => {
                   transform: `rotateY(${angle}deg) translateZ(${RADIUS}px)`,
                 }}
               >
-                {/* Image Card: White Background, Dark Border */}
                 <div className="w-full h-full p-2 group">
                   <div className="w-full h-full relative overflow-hidden bg-white border border-black/10 transition-transform duration-500 hover:scale-[1.02] hover:border-black/30">
                     <img
                       src={item.src}
                       alt={item.label}
-                      // UPDATED: grayscale-[50%] for slight grey, transition-all for smooth color change
-                      className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-all duration-500 grayscale-[50%] group-hover:grayscale-0"
+                      // UPDATED: Changed opacity-90 to opacity-60 for lower initial opacity
+                      className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all duration-500 grayscale-[50%] group-hover:grayscale-0"
                     />
-                    {/* Inner Gradient for Label Readability */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-                    {/* Text Label */}
                     <div className="absolute bottom-6 left-0 right-0 text-center transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
                       <span className="text-[10px] uppercase tracking-[0.3em] text-white font-manrope">
                         {item.label}
@@ -170,9 +170,11 @@ const Cylinder3D = () => {
         </motion.div>
       </motion.div>
 
-      {/* Cinematic Vignette: Fades to WHITE now */}
-      <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white via-white/80 to-transparent pointer-events-none z-10" />
-      <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none z-10" />
+      {/* Cinematic Vignette: Fades to WHITE */}
+      {/* UPDATED: Increased height from h-1/3 to h-2/5 for a stronger fade effect */}
+      <div className="absolute inset-x-0 top-0 h-2/5 bg-gradient-to-b from-white via-white/80 to-transparent pointer-events-none z-10" />
+      <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none z-10" />
+      
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,white_100%)] pointer-events-none z-10 opacity-60" />
     </motion.div>
   );
@@ -180,11 +182,10 @@ const Cylinder3D = () => {
 
 // --- MAIN HERO COMPONENT ---
 const CinematicHero = () => {
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!hasIntroAnimated);
   const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
 
-  // Check for mobile to adjust the "Move Up" animation distance
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
@@ -192,7 +193,14 @@ const CinematicHero = () => {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  if (loading) return <Preloader onComplete={() => setLoading(false)} />;
+  const handleLoadComplete = () => {
+    setLoading(false);
+    hasIntroAnimated = true;
+  };
+
+  if (loading) return <Preloader onComplete={handleLoadComplete} />;
+
+  const cylinderTargetY = isMobile ? "-15%" : "-5%";
 
   return (
     <main className="relative w-full h-[100dvh] bg-white overflow-hidden selection:bg-black selection:text-white">
@@ -203,34 +211,30 @@ const CinematicHero = () => {
       `}</style>
 
       {/* --- 3D SCENE BACKGROUND --- */}
-      {/* WRAPPER ANIMATION: 
-         1. Starts centered (y: 0).
-         2. Delays for 2.2s (waiting for text reveal).
-         3. Moves UP (y: -15% on mobile, -5% desktop) to make room for text.
-      */}
       <motion.div
         className="absolute inset-0 z-0 flex items-center justify-center"
-        initial={{ y: 0 }}
-        animate={{ y: isMobile ? "-15%" : "-5%" }}
-        transition={{ delay: 2.2, duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+        initial={{ y: hasIntroAnimated ? cylinderTargetY : 0 }}
+        animate={{ y: cylinderTargetY }}
+        transition={{ 
+            delay: hasIntroAnimated ? 0 : 2.2, 
+            duration: hasIntroAnimated ? 0 : 1.5, 
+            ease: [0.16, 1, 0.3, 1] 
+        }}
       >
-        {/* MOBILE SCALE: Keeps it large enough to be immersive */}
         <div className="w-full h-full scale-[1.2] sm:scale-[0.7] md:scale-[0.85] lg:scale-100 transition-transform duration-1000">
-          <Cylinder3D />
+          <Cylinder3D skipEntrance={hasIntroAnimated} />
         </div>
       </motion.div>
 
       {/* --- UI OVERLAY --- */}
       <div className="absolute inset-0 z-20 pointer-events-none flex flex-col justify-end p-6 pb-8 sm:p-12 md:p-16">
 
-        {/* Center Title */}
-        {/* UPDATED: Added pointer-events-none so touches pass through to cylinder */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center w-full z-30 pointer-events-none">
           <div className="overflow-hidden">
             <motion.h1
-              initial={{ y: "150%" }}
+              initial={{ y: hasIntroAnimated ? 0 : "150%" }}
               animate={{ y: 0 }}
-              transition={{ delay: 1.5, duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ delay: hasIntroAnimated ? 0 : 1.5, duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
               className="font-oswald text-[16vw] sm:text-[9vw] lg:text-[7vw] font-bold uppercase text-black tracking-tighter leading-[0.85]"
             >
               Immersive
@@ -238,9 +242,9 @@ const CinematicHero = () => {
           </div>
           <div className="overflow-hidden">
             <motion.h1
-              initial={{ y: "150%" }}
+              initial={{ y: hasIntroAnimated ? 0 : "150%" }}
               animate={{ y: 0 }}
-              transition={{ delay: 1.7, duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ delay: hasIntroAnimated ? 0 : 1.7, duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
               className="font-oswald text-[13vw] sm:text-[9vw] lg:text-[7vw] font-light uppercase text-gray-800 tracking-tighter leading-[0.85]"
             >
               Collection
@@ -250,22 +254,11 @@ const CinematicHero = () => {
 
         {/* Bottom Bar */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: hasIntroAnimated ? 1 : 0, y: hasIntroAnimated ? 0 : 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 2.2, duration: 1 }}
+          transition={{ delay: hasIntroAnimated ? 0 : 2.2, duration: 1 }}
           className="flex flex-col sm:flex-row items-end sm:items-center justify-between gap-6 pointer-events-auto w-full mb-[80px]"
         >
-          {/* Play Button Group */}
-          <div className="flex items-center gap-4 ">
-            <button className="w-12 h-12 border border-black/20 rounded-full flex items-center justify-center hover:bg-black hover:text-white transition-all duration-300 shadow-sm bg-white/50 backdrop-blur-sm">
-              <Play className="w-4 h-4 fill-current ml-0.5 text-black hover:text-white transition-colors" />
-            </button>
-            <p className="hidden sm:block max-w-[200px] text-[10px] text-gray-600 font-manrope leading-relaxed uppercase tracking-wide">
-              Drag to explore the <br /> Fall / Winter 2025 Archive
-            </p>
-          </div>
-
-          {/* Enter Gallery Button */}
           <button className="group relative px-6 py-4 bg-black text-white font-manrope text-[10px] sm:text-xs font-bold uppercase tracking-widest overflow-hidden shadow-lg" onClick={()=>{navigate('/collection')} }>
             <span className="relative z-10 flex items-center gap-2 group-hover:gap-4 transition-all duration-300">
               Enter Collection  <MoveRight size={14} />

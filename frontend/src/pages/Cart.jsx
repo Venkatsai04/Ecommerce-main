@@ -1,3 +1,4 @@
+
 import React, { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import Title from "../components/Title";
@@ -32,7 +33,19 @@ const Cart = () => {
 
   return (
     <div className="border-t pt-14">
+<button
+          onClick={() => {
+            if (window.history.length > 2) navigate(-1);
+            else navigate("/collection");
+          }}
+          className="top-6 left-6 z-40 px-4 py-2 bg-white border border-black text-black font-manrope text-xs tracking-widest uppercase hover:bg-black hover:text-white transition-all mb-4"
+        >
+          Back
+        </button>
       <div className="mb-3 text-2xl">
+        {/* BACK BUTTON */}
+        
+
         <Title text1="YOUR" text2="CART" />
       </div>
 
