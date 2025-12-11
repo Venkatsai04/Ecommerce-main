@@ -15,7 +15,7 @@ const WinterChills = () => {
       const y = e.clientY;
 
       // 2. Create 8-12 snowflakes per click
-      const particleCount = 12;
+      const particleCount = 3;
       const newFlakes = Array.from({ length: particleCount }, (_, i) => ({
         id: generateId() + i, // Unique ID
         x,

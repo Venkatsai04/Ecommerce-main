@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
+import { CheckCircle } from "lucide-react";
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
@@ -8,47 +9,54 @@ const PaymentSuccess = () => {
   const amount = location.state?.totalAmount;
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4 bg-gray-100">
+    <div className="min-h-screen bg-white flex items-center justify-center px-6 py-10">
       <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ duration: 0.6, type: "spring", stiffness: 120 }}
-        className="bg-white shadow-xl rounded-2xl p-10 flex flex-col items-center gap-6"
+        initial={{ scale: 0.7, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="bg-white border-4 border-black max-w-md w-full p-8 shadow-[8px_8px_0px_#000] text-center"
       >
-        {/* Animated Checkmark */}
-        <motion.svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-28 w-28 text-blue-500"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth={3}
+        {/* Icon */}
+        <motion.div
+          initial={{ rotate: -10, scale: 0 }}
+          animate={{ rotate: 0, scale: 1 }}
+          transition={{ type: "spring", stiffness: 120, damping: 8 }}
+          className="flex justify-center mb-4"
         >
-          <motion.path
-            d="M5 13l4 4L19 7"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 0.8, ease: "easeInOut" }}
-          />
-        </motion.svg>
+          <CheckCircle className="w-20 h-20 text-green-600 drop-shadow-[2px_2px_0px_#000]" />
+        </motion.div>
 
-        <h1 className="text-3xl font-bold text-gray-800 text-center">
-          Payment Successful!
+        {/* Heading */}
+        <h1 className="font-oswald text-4xl font-black uppercase tracking-tight text-black">
+          Payment Success
         </h1>
-        <p className="text-gray-500 text-center">
-          {amount ? `You have paid ₹${amount}.` : "Your payment has been received."}
+
+        <p className="mt-3 text-sm text-gray-600 font-manrope leading-relaxed">
+          {amount
+            ? `Your payment of ₹${amount} was received successfully.`
+            : "Your payment has been completed successfully."}
         </p>
 
+        {/* Divider */}
+        <div className="w-full h-[2px] bg-black my-6" />
+
+        {/* CTA */}
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={() => navigate("/orders")}
-          className="mt-4 px-10 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          className="w-full py-4 border-2 border-black bg-black text-white font-oswald uppercase text-sm tracking-widest hover:bg-white hover:text-black transition-all shadow-[4px_4px_0px_#000]"
         >
-          Track Your Orders
+          Track Your Order
         </motion.button>
+
+        {/* Back to Home */}
+        <button
+          onClick={() => navigate("/")}
+          className="mt-4 w-full py-3 text-xs uppercase font-black tracking-wider font-manrope text-gray-500 hover:text-black"
+        >
+          Back to Home
+        </button>
       </motion.div>
     </div>
   );
