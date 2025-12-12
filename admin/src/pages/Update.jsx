@@ -13,7 +13,10 @@ const Update = ({ token }) => {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [subCategory, setSubCategory] = useState("");
-  const [price, setPrice] = useState("");
+
+  const [price, setPrice] = useState("");     // FIXED
+  const [mrp, setMrp] = useState("");         // FIXED
+
   const [sizes, setSizes] = useState([]);
   const [bestSeller, setBestSeller] = useState(false);
   const [soldOut, setSoldOut] = useState(false);
@@ -45,7 +48,10 @@ const Update = ({ token }) => {
       setDescription(p.description);
       setCategory(p.category);
       setSubCategory(p.subCategory);
-      setPrice(p.price);
+
+      setPrice(p.price || "");
+      setMrp(p.mrp || "");          // FIX
+
       setSizes(p.sizes);
       setBestSeller(p.bestSeller);
       setSoldOut(p.soldOut || false);
@@ -59,13 +65,20 @@ const Update = ({ token }) => {
   const updateProduct = async (e) => {
     e.preventDefault();
 
+    // VALIDATION
+    if (isNaN(Number(price))) return toast.error("Invalid price");
+    if (mrp !== "" && isNaN(Number(mrp))) return toast.error("Invalid MRP");
+
     const formData = new FormData();
     formData.append("id", selected);
     formData.append("name", name);
     formData.append("description", description);
     formData.append("category", category);
     formData.append("subCategory", subCategory);
-    formData.append("price", price);
+
+    formData.append("price", Number(price));     // FIXED: Always number
+    formData.append("mrp", mrp ? Number(mrp) : "");  // FIXED: Optional
+
     formData.append("sizes", JSON.stringify(sizes));
     formData.append("bestSeller", bestSeller);
     formData.append("soldOut", soldOut);
@@ -82,7 +95,8 @@ const Update = ({ token }) => {
 
       if (res.data.success) toast.success("Product Updated Successfully");
       else toast.error("Update failed");
-    } catch {
+    } catch (err) {
+      console.log(err);
       toast.error("Error updating product");
     }
   };
@@ -115,24 +129,15 @@ const Update = ({ token }) => {
 
       {/* UPDATE FORM */}
       {selected && (
-        <form
-          onSubmit={updateProduct}
-          className="bg-white p-5 sm:p-6 rounded-xl shadow flex flex-col gap-6"
-        >
-          <h2 className="text-lg sm:text-xl font-semibold border-b pb-2">
-            Update Product
-          </h2>
+        <form onSubmit={updateProduct} className="bg-white p-5 sm:p-6 rounded-xl shadow flex flex-col gap-6">
+          <h2 className="text-lg sm:text-xl font-semibold border-b pb-2">Update Product</h2>
 
           {/* EXISTING IMAGES */}
           <div>
             <p className="font-medium mb-2">Existing Images</p>
             <div className="grid grid-cols-4 gap-2 sm:gap-4">
               {existingImages.map((img, i) => (
-                <img
-                  key={i}
-                  src={img}
-                  className="w-full aspect-square rounded-md border object-cover"
-                />
+                <img key={i} src={img} className="w-full aspect-square rounded-md border object-cover" />
               ))}
             </div>
           </div>
@@ -163,7 +168,7 @@ const Update = ({ token }) => {
             </div>
           </div>
 
-          {/* NAME + PRICE */}
+          {/* NAME + PRICE + MRP */}
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <label className="font-medium text-sm">Product Name</label>
@@ -175,6 +180,7 @@ const Update = ({ token }) => {
               />
             </div>
 
+            {/* PRICE */}
             <div>
               <label className="font-medium text-sm">Price (₹)</label>
               <input
@@ -183,6 +189,17 @@ const Update = ({ token }) => {
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 required
+              />
+            </div>
+
+            {/* MRP */}
+            <div>
+              <label className="font-medium text-sm">MRP (₹)</label>
+              <input
+                type="number"
+                className="w-full border rounded-md px-3 py-2"
+                value={mrp}
+                onChange={(e) => setMrp(e.target.value)}  // FIXED
               />
             </div>
           </div>
@@ -278,6 +295,7 @@ const Update = ({ token }) => {
             </label>
           </div>
 
+          {/* SUBMIT */}
           <button
             type="submit"
             className="bg-black text-white py-2 rounded-md w-full sm:w-auto px-6 text-sm"

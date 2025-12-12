@@ -10,7 +10,7 @@ const ProductItem = ({ id, image, name, price, mrp, soldOut }) => {
 
   const discountPercent = mrp
     ? Math.round(((mrp - price) / mrp) * 100)
-    : 70; // default 50% if no mrp
+    : 50; // default 50% if no mrp
 
   return (
     <Link to={`/product/${id}`} className="block text-gray-800 relative">
