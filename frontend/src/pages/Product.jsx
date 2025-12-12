@@ -7,9 +7,7 @@ import { assets } from "../assets/assets";
 import RelatedProducts from "../components/RelatedProducts";
 
 const Product = () => {
-
-  const apiRoute = import.meta.env.VITE_PORT
-
+  const apiRoute = import.meta.env.VITE_PORT;
 
   const { productId } = useParams();
   const navigate = useNavigate();
@@ -23,7 +21,6 @@ const Product = () => {
   const [newReview, setNewReview] = useState("");
   const [rating, setRating] = useState(5);
 
-  // Delivery checking
   const [pincode, setPincode] = useState("");
   const [deliveryInfo, setDeliveryInfo] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -33,8 +30,6 @@ const Product = () => {
     const product = products.find((item) => item._id === productId);
     if (product) {
       setProductData(product);
-      console.log(productData);
-
       setImage(product.image[0]);
     }
   }, [productId, products]);
@@ -98,7 +93,6 @@ const Product = () => {
     }
   };
 
-  // Try On
   const handleTryOn = () => {
     if (!productData) return;
     navigate("/try-on", {
@@ -117,7 +111,6 @@ const Product = () => {
 
   if (!productData) return <div className="opacity-0"></div>;
 
-  // 69% OFF formula
   const originalPrice = Math.round(productData.price / 0.31);
 
   return (
@@ -128,12 +121,12 @@ const Product = () => {
         <div className="flex flex-col-reverse flex-1 gap-3 sm:flex-row">
 
           {/* Thumbnails */}
-          <div className="flex sm:flex-col gap-3 overflow-x-auto sm:overflow-visible w-full sm:w-[18%]">
+          <div className="flex sm:flex-col gap-3 overflow-x-auto sm:overflow-visible w-full sm:w-[18%] snap-x snap-mandatory">
             {productData.image.map((item, index) => (
               <div
                 key={index}
                 onClick={() => setImage(item)}
-                className={`cursor-pointer border rounded-md overflow-hidden
+                className={`cursor-pointer border rounded-md overflow-hidden snap-center
                   ${image === item ? "border-black" : "border-gray-300"}
                   flex-shrink-0 w-20 h-20 sm:w-full sm:h-auto sm:aspect-square bg-gray-100`}
               >
@@ -142,39 +135,62 @@ const Product = () => {
             ))}
           </div>
 
-          {/* Main Image */}
+          {/* ---------- MAIN IMAGE SLIDER (NEW) ---------- */}
           <div className="relative w-full sm:w-[80%]">
+
             {productData.soldOut && (
               <div className="absolute top-3 right-3 bg-black text-white px-3 py-1 text-xs rounded-sm z-10">
                 SOLD OUT
               </div>
             )}
-            <div className="w-full aspect-[4/5] bg-gray-100 rounded-md overflow-hidden">
-              <img src={image} alt="product" className="w-full h-full object-cover" />
+
+            <div
+              className="w-full aspect-[4/5] overflow-x-auto snap-x snap-mandatory flex rounded-md bg-gray-100"
+              style={{ scrollSnapType: "x mandatory", scrollBehavior: "smooth" }}
+            >
+              {productData.image.map((img, index) => (
+                <div
+                  key={index}
+                  className="w-full h-full flex-shrink-0 snap-center"
+                  onClick={() => setImage(img)}
+                >
+                  <img
+                    src={img}
+                    className="w-full h-full object-cover"
+                    alt="product"
+                  />
+                </div>
+              ))}
+            </div>
+
+            {/* Slider dots */}
+            <div className="flex justify-center gap-2 mt-2">
+              {productData.image.map((_, index) => (
+                <div
+                  key={index}
+                  className={`w-2 h-2 rounded-full ${
+                    image === productData.image[index] ? "bg-black" : "bg-gray-400"
+                  }`}
+                ></div>
+              ))}
             </div>
           </div>
-
         </div>
 
         {/* ---------- PRODUCT INFO ---------- */}
         <div className="flex-1">
           <h1 className="mt-2 text-2xl font-medium">{productData.name}</h1>
 
-          {/* SOLD OUT NOTICE */}
           {productData.soldOut && (
             <p className="text-red-600 font-semibold text-sm mt-1">🚫 Currently Sold Out</p>
           )}
 
-          {/* PRICE SECTION */}
           <div className="mt-5 flex items-center gap-3">
             <p className="text-3xl font-medium">{currency}{productData.price}</p>
-
             <p className="text-lg line-through text-gray-500">{currency}{originalPrice}</p>
-
             <p className="text-lg font-bold text-green-600">69% OFF</p>
           </div>
 
-          {/* SIZE SELECTION */}
           <div className="flex flex-col gap-4 my-8">
             <p>Select Size</p>
             <div className="flex gap-2">
@@ -185,8 +201,7 @@ const Product = () => {
                   disabled={productData.soldOut}
                   className={`border py-2 px-4 rounded-md 
                     ${size === item ? "border-orange-500 bg-gray-200" : "bg-gray-100"} 
-                    ${productData.soldOut ? "opacity-40 cursor-not-allowed" : ""}
-                  `}
+                    ${productData.soldOut ? "opacity-40 cursor-not-allowed" : ""}`}
                 >
                   {item}
                 </button>
@@ -194,10 +209,7 @@ const Product = () => {
             </div>
           </div>
 
-          {/* ---------- ACTION BUTTONS ---------- */}
           <div className="flex gap-4 items-center">
-
-            {/* Add to Cart Logic */}
             {productData.soldOut ? (
               <button disabled className="px-8 py-3 text-sm text-white bg-gray-400 cursor-not-allowed">
                 SOLD OUT
@@ -206,20 +218,15 @@ const Product = () => {
               <button
                 onClick={async () => {
                   if (!size) return alert("Please select a size");
-
-                  await addToCart(productData._id, size);  // wait for backend update
-
-                  // ⭐ Redirect to cart after successful add
+                  await addToCart(productData._id, size);
                   navigate("/cart");
                 }}
                 className="px-8 py-3 text-sm text-white bg-black active:bg-gray-700"
               >
                 ADD TO CART
               </button>
-
             )}
 
-            {/* Try On */}
             <button
               onClick={handleTryOn}
               className="px-8 py-3 text-sm text-white bg-gradient-to-r from-yellow-600 to-purple-600 hover:opacity-90 shadow-md transition-all"
@@ -228,7 +235,6 @@ const Product = () => {
             </button>
           </div>
 
-          {/* ---------- DELIVERY CHECK ---------- */}
           <div className="mt-6 border-t pt-5">
             <h3 className="text-lg font-extrabold mb-3 uppercase tracking-tight">Delivery Check</h3>
 
@@ -266,14 +272,12 @@ const Product = () => {
               </div>
             )}
 
-            {/* ---------- DESCRIPTION ---------- */}
             <div className="mt-8 border-t pt-6">
               <h3 className="text-lg font-extrabold mb-3 uppercase tracking-tight">Product Description</h3>
               <p className="text-gray-700 text-sm md:text-base mb-6">
                 {productData.description || "No description available."}
               </p>
 
-              {/* CARE & RETURNS */}
               <h3 className="text-lg font-extrabold mb-3 uppercase tracking-tight">Care & Returns</h3>
               <p className="text-gray-700 mb-4 text-sm">
                 <span className="font-semibold">Care Instructions:</span><br />
@@ -289,7 +293,6 @@ const Product = () => {
                 This item is <span className="font-bold">not eligible for returns</span>.
               </p>
 
-              {/* ---------- REVIEWS ---------- */}
               <div className="mt-6 border-t pt-6">
                 <h3 className="text-lg font-extrabold mb-4 uppercase tracking-tight">Customer Reviews</h3>
 
@@ -314,7 +317,6 @@ const Product = () => {
                   <p className="text-gray-500 text-sm">No reviews yet.</p>
                 )}
 
-                {/* Add Review */}
                 {user && (
                   <div className="mt-4">
                     <textarea
@@ -351,7 +353,6 @@ const Product = () => {
         </div>
       </div>
 
-      {/* RELATED PRODUCTS */}
       <RelatedProducts category={productData.category} subCategory={productData.subCategory} />
     </div>
   );

@@ -13,6 +13,9 @@ const productSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  Mrp:{
+    type: Number,
+  },
   image: {
     type: Array,
     required: true,
