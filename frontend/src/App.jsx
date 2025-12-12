@@ -1,5 +1,6 @@
-import React from 'react'
+import React, { useEffect } from 'react' // ✅ Added useEffect
 import { Route, Routes } from 'react-router-dom'
+import axios from 'axios' // ✅ Added axios for tracking
 import Home from './pages/Home'
 import Collection from './pages/Collection'
 import About from './pages/About'
@@ -25,6 +26,19 @@ import ReturnsPolicy from './pages/ReturnsPolicy'
 import ForgotPassword from './pages/ForgotPassword'
 
 const App = () => {
+
+  // ✅ TRACK VISIT: Sends a signal to backend when app loads
+  useEffect(() => {
+    const trackVisit = async () => {
+      try {
+        await axios.post(import.meta.env.VITE_PORT + '/analytics/track-visit');
+      } catch (error) {
+        console.error("Analytics Error:", error);
+      }
+    };
+    trackVisit();
+  }, []);
+
   return (
     <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
       {/* <DiwaliFirework /> */}

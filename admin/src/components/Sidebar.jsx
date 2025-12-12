@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { assets } from "../assets/assets";
-import { ChevronRight, ChevronLeft } from "lucide-react";
+import { ChevronRight, ChevronLeft, LayoutDashboard } from "lucide-react"; // ✅ Added LayoutDashboard
 
 const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -22,6 +22,27 @@ const Sidebar = () => {
       </div>
 
       <div className="flex flex-col gap-3 px-2">
+        {/* ✅ ANALYTICS TAB ADDED HERE */}
+        <NavLink
+          to="/"
+          className={({ isActive }) =>
+            `flex items-center ${
+              collapsed ? "justify-center" : "gap-3 px-3"
+            } py-3 rounded-lg transition-colors ${
+              isActive ? "bg-gray-900 text-white" : "hover:bg-gray-100"
+            }`
+          }
+        >
+          <div className="flex justify-center items-center w-6 h-6 flex-shrink-0">
+             <LayoutDashboard size={20} className={collapsed ? "" : ""} />
+          </div>
+          {!collapsed && (
+            <span className="text-[15px] font-medium whitespace-nowrap">
+              Analytics
+            </span>
+          )}
+        </NavLink>
+
         {[
           { to: "/add", icon: assets.add_icon, label: "Add Product" },
           { to: "/list", icon: assets.parcel_icon, label: "Product List" },

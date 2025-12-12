@@ -7,7 +7,8 @@ import Add from "./pages/Add";
 import List from "./pages/List";
 import Orders from "./pages/Orders";
 import Login from "./components/Login";
-import Update from "./pages/Update"; // ✅ NEW IMPORT
+import Update from "./pages/Update";
+import Analytics from "./pages/Analytics"; // ✅ NEW IMPORT
 
 import { ToastContainer, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -45,16 +46,16 @@ const App = () => {
           <Navbar setToken={setToken} />
 
           <div className="flex flex-1 pt-16">
-            {/* Sidebar (optional but recommended) */}
-            {/* <Sidebar /> */}
+            <Sidebar />
 
             <main className="flex-1 p-4 md:p-8 overflow-y-auto">
               <Routes>
+                {/* ✅ ANALYTICS IS NOW THE DEFAULT ROUTE */}
+                <Route path="/" element={<Analytics token={token} />} />
                 <Route path="/add" element={<Add token={token} />} />
                 <Route path="/list" element={<List token={token} />} />
                 <Route path="/orders" element={<Orders token={token} />} />
                 <Route path="/update" element={<Update token={token} />} />
-
               </Routes>
             </main>
           </div>

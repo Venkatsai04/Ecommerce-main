@@ -15,6 +15,7 @@ const Add = ({ token }) => {
   const [category, setCategory] = useState("");      // MUST NOT be empty on submit
   const [subCategory, setSubCategory] = useState(""); // MUST NOT be empty
   const [price, setPrice] = useState("");
+  const [mrp, setMrp] = useState("");
   const [sizes, setSizes] = useState([]);
   const [bestSeller, setBestSeller] = useState(false);
 
@@ -37,6 +38,7 @@ const Add = ({ token }) => {
     setCategory("");
     setSubCategory("");
     setPrice("");
+    setMrp("");
     setSizes([]);
     setBestSeller(false);
   };
@@ -60,6 +62,7 @@ const Add = ({ token }) => {
       formData.append("category", category);
       formData.append("subCategory", subCategory);
       formData.append("price", price);
+      formData.append("mrp", mrp);
       formData.append("sizes", JSON.stringify(sizes));
       formData.append("bestSeller", bestSeller);
 
@@ -143,7 +146,15 @@ const Add = ({ token }) => {
             required
           />
         </div>
-      </div>
+          <label className="text-gray-700 mb-1 block">Mrp (₹)</label>
+          <input
+            type="number"
+            className="w-full border rounded-md px-3 py-2"
+            value={mrp}
+            onChange={(e) => setMrp(e.target.value)}
+            required
+          />
+        </div>
 
       {/* DESCRIPTION */}
       <div>

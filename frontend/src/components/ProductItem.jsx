@@ -2,10 +2,15 @@ import React, { useContext } from "react";
 import { ShopContext } from "../context/ShopContext";
 import { Link } from "react-router-dom";
 
-const ProductItem = ({ id, image, name, price, soldOut }) => {
+const ProductItem = ({ id, image, name, price, mrp, soldOut }) => {
   const { currency } = useContext(ShopContext);
 
-  const originalPrice = Math.round(price / 0.31);
+  // If mrp is missing -> assume 50% OFF (MRP = price * 2)
+  const finalMrp = mrp ? mrp : price * 2;
+
+  const discountPercent = mrp
+    ? Math.round(((mrp - price) / mrp) * 100)
+    : 70; // default 50% if no mrp
 
   return (
     <Link to={`/product/${id}`} className="block text-gray-800 relative">
@@ -35,15 +40,18 @@ const ProductItem = ({ id, image, name, price, soldOut }) => {
 
       {/* PRICE */}
       <div className="flex items-center gap-2">
+        {/* Selling Price */}
         <p className={`text-sm font-semibold ${soldOut ? "text-gray-400" : "text-black"}`}>
           {currency} {price}
         </p>
 
+        {/* MRP */}
         <p className="text-xs line-through text-gray-500">
-          {currency} {originalPrice}
+          {currency} {finalMrp}
         </p>
 
-        <p className="text-xs font-bold text-green-600">69% OFF</p>
+        {/* Discount */}
+        <p className="text-xs font-bold text-green-600">{discountPercent}% OFF</p>
       </div>
     </Link>
   );

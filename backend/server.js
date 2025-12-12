@@ -1,4 +1,3 @@
-
 import express from "express";
 import cors from "cors";
 import "dotenv/config";
@@ -15,6 +14,7 @@ import cartRoutes from "./routes/cartRoutes.js";
 import paymentRoutes from "./routes/paymentRoute.js";
 import shippingRoutes from "./routes/shippingRoutes.js";
 import tryOnRoute from "./routes/tryOnRoute.js";
+import analyticsRouter from "./routes/analyticsRoute.js"; // ✅ NEW IMPORT
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -38,12 +38,7 @@ app.use(
   })
 );
 
-// Allow OPTIONS preflight requests
 app.options("*", cors());
-
-
-
-
 
 app.use(express.json({ limit: "25mb" }));
 app.use(express.urlencoded({ limit: "25mb", extended: true }));
@@ -56,6 +51,7 @@ app.use("/api", cartRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/shipping", shippingRoutes);
 app.use("/api/tryon", tryOnRoute);
+app.use("/api/analytics", analyticsRouter); // ✅ NEW ROUTE
 
 app.get("/", (req, res) => {
   res.send("Sahara API running");
@@ -73,5 +69,3 @@ app.get("/api/products/all", async (req, res) => {
 app.listen(port, "0.0.0.0", () => {
   console.log(`Server running on port ${port}`);
 });
-
-
