@@ -50,7 +50,6 @@ const Collection = () => {
   }, [selectedGender, selectedTypes, selectedSizes, sortType]);
   /* ================================================================== */
 
-  // TOGGLE HELPER
   const toggle = (value, setter, list) => {
     setter(
       list.includes(value)
@@ -81,7 +80,19 @@ const Collection = () => {
       );
     }
 
-    if (sortType === "low-high") {
+    // SORTING
+    if (sortType === "latest") {
+      copy.sort((a, b) => {
+        // 1️⃣ If createdAt exists, use it
+        if (a.createdAt && b.createdAt) {
+          return new Date(b.createdAt) - new Date(a.createdAt);
+        }
+
+        // 2️⃣ Fallback: MongoDB ObjectId timestamp
+        return b._id.localeCompare(a._id);
+      });
+
+    } else if (sortType === "low-high") {
       copy.sort((a, b) => a.price - b.price);
     } else if (sortType === "high-low") {
       copy.sort((a, b) => b.price - a.price);
@@ -122,9 +133,11 @@ const Collection = () => {
           <span>
             {sortType === "relevant"
               ? "Sort: Relevant"
-              : sortType === "low-high"
-              ? "Sort: Low → High"
-              : "Sort: High → Low"}
+              : sortType === "latest"
+                ? "Sort: Latest"
+                : sortType === "low-high"
+                  ? "Sort: Low → High"
+                  : "Sort: High → Low"}
           </span>
           <span>▾</span>
         </div>
@@ -133,6 +146,7 @@ const Collection = () => {
           <div className="absolute w-full bg-white border rounded-md z-20">
             {[
               { k: "relevant", t: "Relevant" },
+              { k: "latest", t: "Latest" },
               { k: "low-high", t: "Low → High" },
               { k: "high-low", t: "High → Low" },
             ].map((o) => (
@@ -181,54 +195,51 @@ const Collection = () => {
               <button onClick={() => setFilterOpen(false)}>✕</button>
             </div>
 
-            {/* GENDER */}
+            {/* Gender */}
             <p className="font-medium">Gender</p>
             <div className="flex gap-2 mt-2">
               {["Men", "Women"].map((g) => (
                 <button
                   key={g}
                   onClick={() => toggle(g, setSelectedGender, selectedGender)}
-                  className={`px-3 py-1 border rounded ${
-                    selectedGender.includes(g)
+                  className={`px-3 py-1 border rounded ${selectedGender.includes(g)
                       ? "bg-black text-white"
                       : ""
-                  }`}
+                    }`}
                 >
                   {g}
                 </button>
               ))}
             </div>
 
-            {/* TYPES */}
+            {/* Product Type */}
             <p className="font-medium mt-5">Product Type</p>
             <div className="flex flex-wrap gap-2 mt-2">
               {["Hoodie", "Zipper", "Jacket", "Wind Jacket", "Vintage"].map((t) => (
                 <button
                   key={t}
                   onClick={() => toggle(t, setSelectedTypes, selectedTypes)}
-                  className={`px-3 py-1 border rounded ${
-                    selectedTypes.includes(t)
+                  className={`px-3 py-1 border rounded ${selectedTypes.includes(t)
                       ? "bg-black text-white"
                       : ""
-                  }`}
+                    }`}
                 >
                   {t}
                 </button>
               ))}
             </div>
 
-            {/* SIZES */}
+            {/* Sizes */}
             <p className="font-medium mt-5">Sizes</p>
             <div className="flex gap-2 mt-2">
               {["S", "M", "L", "XL", "XXL"].map((s) => (
                 <button
                   key={s}
                   onClick={() => toggle(s, setSelectedSizes, selectedSizes)}
-                  className={`px-3 py-1 border rounded ${
-                    selectedSizes.includes(s)
+                  className={`px-3 py-1 border rounded ${selectedSizes.includes(s)
                       ? "bg-black text-white"
                       : ""
-                  }`}
+                    }`}
                 >
                   {s}
                 </button>
@@ -253,5 +264,6 @@ const Collection = () => {
     </div>
   );
 };
+
 
 export default Collection;
