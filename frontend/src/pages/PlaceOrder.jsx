@@ -188,7 +188,7 @@ const PlaceOrder = () => {
     }
 
     // ❤️ Prepaid flow
-    const items = getItemsArray();
+    const items = getItemsArray(); 
 
     try {
       const { data } = await axios.post(
