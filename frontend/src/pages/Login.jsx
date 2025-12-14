@@ -69,8 +69,8 @@ const Login = () => {
       >
         {mode === "Sign Up" && (
           <div className="flex flex-col">
-             {/* Labels help browsers identify fields even if hidden visually */}
-            <label htmlFor="name" className="text-sm font-medium mb-1">Name</label>
+            {/* Labels help browsers identify fields even if hidden visually */}
+            <label htmlFor="name" className="text-sm font-medium mb-1"></label>
             <input
               id="name"
               name="name"
@@ -85,7 +85,7 @@ const Login = () => {
         )}
 
         <div className="flex flex-col">
-          <label htmlFor="email" className="text-sm font-medium mb-1">Email</label>
+          <label htmlFor="email" className="text-sm font-medium mb-1"></label>
           <input
             id="email"
             name="email"
@@ -104,7 +104,7 @@ const Login = () => {
         </div>
 
         <div className="flex flex-col">
-          <label htmlFor="password" className="text-sm font-medium mb-1">Password</label>
+          <label htmlFor="password" className="text-sm font-medium mb-1"></label>
           <input
             id="password"
             name="password"
@@ -134,14 +134,28 @@ const Login = () => {
       <p
         className="text-sm cursor-pointer hover:underline"
         onClick={() => {
-           // Reset form data when switching so autofill doesn't get weird
-           setForm({ name: "", email: "", password: "" }); 
-           setMode(mode === "Login" ? "Sign Up" : "Login");
+          // Reset form data when switching so autofill doesn't get weird
+          setForm({ name: "", email: "", password: "" });
+          setMode(mode === "Login" ? "Sign Up" : "Login");
         }}
       >
-        {mode === "Login"
-          ? "Create new account"
-          : "Already have an account? Login"}
+
+        {mode === "Login" ? (
+          <div className="text-center">
+            <p>Don’t have an account? Create one!</p>
+            <button
+              className="text-sm text-blue-500 hover:underline"
+              onClick={() => navigate("/reset-password")}
+            >
+              Forgot Password?
+            </button>
+          </div>
+        ) : (
+          <p className="text-center">
+            Already have an account? Login!
+          </p>
+        )}
+
       </p>
     </div>
   );
