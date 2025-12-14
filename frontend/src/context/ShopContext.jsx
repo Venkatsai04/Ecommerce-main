@@ -55,7 +55,7 @@ const ShopContextProvider = ({ children }) => {
   }, [token]); // ⭐ When token updates → cart loads correctly!
 
   const forceLogin = () => {
-    toast.error("Please login first");
+    toast.error("Please login to place order");
     navigate(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
   };
 
