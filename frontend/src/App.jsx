@@ -25,6 +25,7 @@ import WinterChills from './components/WinterChills'
 import ReturnsPolicy from './pages/ReturnsPolicy'
 import ForgotPassword from './pages/ForgotPassword'
 import Register from './pages/Register'
+import ResetPassword from './pages/ResetPassword'
 
 const App = () => {
 
@@ -65,6 +66,8 @@ const App = () => {
         <Route path="/try-on" element={<TryOn />} />
         <Route path="/returns" element={<ReturnsPolicy />} />
         <Route path="/reset-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+
 
       </Routes>
       <Footer />

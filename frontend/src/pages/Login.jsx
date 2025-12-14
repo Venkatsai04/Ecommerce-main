@@ -16,6 +16,9 @@ const Login = () => {
     email: "",
     password: "",
   });
+  
+  // ⭐ ADDED: State for toggle
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const inputHandler = (e) =>
@@ -56,11 +59,6 @@ const Login = () => {
     <div className="flex flex-col items-center w-[90%] sm:max-w-96 m-auto mt-14 gap-4 text-gray-800">
       <h2 className="text-3xl mt-10">{mode}</h2>
 
-      {/* CRITICAL FIX: 
-        We use key={mode}. This forces React to destroy and recreate the form 
-        when switching between Login and Sign Up. This tells the browser: 
-        "This is a brand new form, treat autofill logic differently."
-      */}
       <form
         key={mode}
         onSubmit={submitHandler}
@@ -69,7 +67,6 @@ const Login = () => {
       >
         {mode === "Sign Up" && (
           <div className="flex flex-col">
-            {/* Labels help browsers identify fields even if hidden visually */}
             <label htmlFor="name" className="text-sm font-medium mb-1"></label>
             <input
               id="name"
@@ -94,10 +91,6 @@ const Login = () => {
             onChange={inputHandler}
             placeholder="Email"
             className="w-full px-3 py-2 border border-gray-800"
-            /* CRITICAL FIX: 
-              Use "username" for the login identifier. 
-              This links the email to the password in the browser's vault.
-            */
             autoComplete="username"
             required
           />
@@ -105,25 +98,30 @@ const Login = () => {
 
         <div className="flex flex-col">
           <label htmlFor="password" className="text-sm font-medium mb-1"></label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            value={form.password}
-            onChange={inputHandler}
-            placeholder="Password"
-            className="w-full px-3 py-2 border border-gray-800"
-            /* CRITICAL FIX: 
-              "current-password" tells browser to autofill existing login.
-              "new-password" tells browser to suggest a strong password and save it.
-            */
-            autoComplete={mode === "Login" ? "current-password" : "new-password"}
-            required
-          />
+          {/* ⭐ MODIFIED: Added relative div and toggle logic */}
+          <div className="relative">
+            <input
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"} // Dynamic type
+              value={form.password}
+              onChange={inputHandler}
+              placeholder="Password"
+              className="w-full px-3 py-2 border border-gray-800"
+              autoComplete={mode === "Login" ? "current-password" : "new-password"}
+              required
+            />
+            <span 
+              className="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-sm text-gray-600 select-none"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? "Hide" : "Show"}
+            </span>
+          </div>
         </div>
 
         <button
-          type="submit" /* Explicit type submit is required for some password managers */
+          type="submit" 
           disabled={loading}
           className="w-full px-8 py-2 mt-4 text-white bg-black hover:bg-gray-800 transition-colors"
         >
@@ -131,32 +129,31 @@ const Login = () => {
         </button>
       </form>
 
-      <p
+      <div
         className="text-sm cursor-pointer hover:underline"
-        onClick={() => {
-          // Reset form data when switching so autofill doesn't get weird
-          setForm({ name: "", email: "", password: "" });
-          setMode(mode === "Login" ? "Sign Up" : "Login");
-        }}
       >
-
         {mode === "Login" ? (
           <div className="text-center">
-            <p>Don’t have an account? Create one!</p>
+            <p onClick={() => {
+                setForm({ name: "", email: "", password: "" });
+                setMode("Sign Up");
+            }}>Don’t have an account? Create one!</p>
             <button
-              className="text-sm text-blue-500 hover:underline"
+              className="text-sm text-blue-500 hover:underline mt-1"
               onClick={() => navigate("/reset-password")}
             >
               Forgot Password?
             </button>
           </div>
         ) : (
-          <p className="text-center">
+          <p className="text-center" onClick={() => {
+            setForm({ name: "", email: "", password: "" });
+            setMode("Login");
+          }}>
             Already have an account? Login!
           </p>
         )}
-
-      </p>
+      </div>
     </div>
   );
 };
