@@ -506,7 +506,7 @@ const Product = () => {
               onClick={handleTryOn}
               className="px-8 py-3 text-sm text-white bg-gradient-to-r from-yellow-600 to-purple-600 hover:opacity-90 shadow-md transition-all"
             >
-              TRY ON ✨
+              AI TRY ON ✨
             </button>
           </div>
 
