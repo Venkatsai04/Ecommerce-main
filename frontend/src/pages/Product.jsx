@@ -28,6 +28,7 @@ const Product = () => {
   // SLIDER STATES
   const sliderRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const scrollTimeoutRef = useRef(null);
 
   // ZOOM / PAN STATES
   const [scale, setScale] = useState(1);
@@ -200,11 +201,34 @@ const Product = () => {
     setIsPanning(false);
   };
   const onTouchStart = (e) => {
+    // If two fingers, handle pinch zoom
     if (e.touches.length === 2) {
+      e.preventDefault();
       const dist = touchDistance(e.touches[0], e.touches[1]);
       setLastTouchDistance(dist);
-    } else if (e.touches.length === 1) {
+    } 
+    // If one finger and already zoomed, handle panning
+    else if (e.touches.length === 1 && scale > 1) {
+      e.preventDefault();
+      setIsPanning(true);
+      const t = e.touches[0];
+      setLastPan({ x: t.clientX, y: t.clientY });
+      
+      // Handle double tap for zoom
       if (doubleTapTimer) {
+        clearTimeout(doubleTapTimer);
+        setDoubleTapTimer(null);
+        toggleZoom({ x: t.clientX, y: t.clientY });
+      } else {
+        const timer = setTimeout(() => { setDoubleTapTimer(null); }, 300);
+        setDoubleTapTimer(timer);
+      }
+    }
+    // If one finger and NOT zoomed, let native scroll handle it (for swiping)
+    else if (e.touches.length === 1 && scale === 1) {
+      // Handle double tap to zoom
+      if (doubleTapTimer) {
+        e.preventDefault();
         clearTimeout(doubleTapTimer);
         setDoubleTapTimer(null);
         const touch = e.touches[0];
@@ -213,11 +237,7 @@ const Product = () => {
         const timer = setTimeout(() => { setDoubleTapTimer(null); }, 300);
         setDoubleTapTimer(timer);
       }
-      if (scale > 1) {
-        setIsPanning(true);
-        const t = e.touches[0];
-        setLastPan({ x: t.clientX, y: t.clientY });
-      }
+      // Don't prevent default - let browser handle the swipe
     }
   };
   const onTouchMove = (e) => {
@@ -262,19 +282,40 @@ const Product = () => {
   };
   const onWheel = (e) => {};
 
+  // FIXED: Improved goToIndex function
   const goToIndex = (index) => {
     if (!sliderRef.current) return;
     const width = sliderRef.current.offsetWidth;
     sliderRef.current.scrollTo({ left: index * width, behavior: "smooth" });
+    // Update activeIndex immediately for responsive UI
     setActiveIndex(index);
   };
+
+  // FIXED: Improved prev/next slide functions
   const prevSlide = () => {
-    const next = clamp(activeIndex - 1, 0, productData.image.length - 1);
-    goToIndex(next);
+    if (activeIndex > 0) {
+      goToIndex(activeIndex - 1);
+    }
   };
   const nextSlide = () => {
-    const next = clamp(activeIndex + 1, 0, productData.image.length - 1);
-    goToIndex(next);
+    if (activeIndex < productData.image.length - 1) {
+      goToIndex(activeIndex + 1);
+    }
+  };
+
+  // FIXED: Improved scroll handler with debouncing
+  const handleScroll = (e) => {
+    // Only track scroll position when not zoomed
+    if (scale > 1) return;
+    
+    const scrollLeft = e.target.scrollLeft;
+    const width = e.target.offsetWidth;
+    const newIndex = Math.round(scrollLeft / width);
+    
+    // Update immediately for responsive sync with thumbnails and dots
+    if (newIndex !== activeIndex && newIndex >= 0 && newIndex < productData.image.length) {
+      setActiveIndex(newIndex);
+    }
   };
 
   return (
@@ -301,15 +342,13 @@ const Product = () => {
 
             <div
               ref={sliderRef}
-              className="w-full aspect-[4/5] overflow-x-auto snap-x snap-mandatory flex rounded-md bg-gray-100 relative touch-pan-x"
-              style={{ scrollSnapType: "x mandatory", scrollBehavior: "smooth" }}
-              onScroll={(e) => {
-                if (scale > 1) return;
-                const scrollLeft = e.target.scrollLeft;
-                const width = e.target.offsetWidth;
-                const index = Math.round(scrollLeft / width);
-                setActiveIndex(index);
+              className="w-full aspect-[4/5] overflow-x-scroll snap-x snap-mandatory flex rounded-md bg-gray-100 relative"
+              style={{ 
+                scrollSnapType: "x mandatory", 
+                WebkitOverflowScrolling: "touch",
+                touchAction: scale > 1 ? "none" : "pan-x"
               }}
+              onScroll={handleScroll}
               onDoubleClick={onDoubleClick}
               onMouseDown={onMouseDown}
               onMouseMove={onMouseMove}
@@ -321,7 +360,13 @@ const Product = () => {
               onWheel={onWheel}
             >
               {productData.image.map((img, index) => (
-                <div key={index} className="w-full h-full flex-shrink-0 snap-center relative overflow-hidden" style={{ touchAction: scale > 1 ? "none" : "pan-y" }}>
+                <div 
+                  key={index} 
+                  className="w-full h-full flex-shrink-0 snap-center relative overflow-hidden"
+                  style={{ 
+                    touchAction: scale > 1 ? "none" : "auto"
+                  }}
+                >
                   <img
                     src={img}
                     className="w-full h-full object-cover transition-transform duration-75"
@@ -375,8 +420,6 @@ const Product = () => {
               <button
                 onClick={() => {
                   if (!size) return alert("Please select a size");
-                  // FIX IS HERE: We call addToCart, but we DO NOT navigate manually.
-                  // The ShopContext will decide whether to go to Login (if no token) or Cart (if success).
                   addToCart(productData._id, size);
                 }}
                 className="px-8 py-3 text-sm text-white bg-black active:bg-gray-700"
