@@ -10,9 +10,10 @@ const ForgotPassword = () => {
     setMessage("Sending reset link...");
 
     try {
-      const res = await axios.post("https://your-backend.com/api/auth/forgot-password", {
-        email,
-      });
+     const res = await axios.post(
+  `${import.meta.env.VITE_PORT}/user/forgot-password`,
+  { email }
+);
 
       setMessage(res.data.message);
     } catch (error) {
