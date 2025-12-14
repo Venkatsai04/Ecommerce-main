@@ -1,5 +1,5 @@
-import React, { useState, useContext } from "react";
-import { useNavigate, useLocation, Form } from "react-router-dom";
+import { useState, useContext } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
 
@@ -24,44 +24,63 @@ const Login = () => {
 
   const submitHandler = async (e) => {
     e.preventDefault();
+    if (loading) return;
+
     setLoading(true);
 
     try {
       const endpoint =
         mode === "Login" ? "user/login" : "user/register";
-        
 
-      const res = await fetch(`${import.meta.env.VITE_PORT}/${endpoint}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_PORT}/${endpoint}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        }
+      );
 
       const data = await res.json();
+
       if (!data.success) {
         toast.error(data.message);
-        setLoading(false);
         return;
       }
 
-      login(data.token, data.user);
-      toast.success(`${mode} Successful`);
-
-      navigate(redirect); // redirect to previous page
+      if (mode === "Login") {
+        login(data.token, data.user);
+        toast.success("Login successful");
+        navigate(redirect);
+      } else {
+        toast.success("Account created. Please login.");
+        setMode("Login");
+      }
     } catch {
       toast.error("Network error");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
     <form
       onSubmit={submitHandler}
-      className="flex flex-col items-center w-[90%] sm:max-w-96 m-auto mt-14 gap-4 text-gray-800"
+      method="post"
       autoComplete="on"
+      className="flex flex-col items-center w-[90%] sm:max-w-96 m-auto mt-14 gap-4 text-gray-800"
     >
       <h2 className="text-3xl mt-10">{mode}</h2>
+
+      {/* 🔑 PASSWORD MANAGER FIX (DO NOT REMOVE) */}
+      <input
+        type="text"
+        name="username"
+        autoComplete="username"
+        value={form.email}
+        readOnly
+        hidden
+      />
 
       {mode === "Sign Up" && (
         <input
@@ -81,7 +100,8 @@ const Login = () => {
         onChange={inputHandler}
         placeholder="Email"
         className="w-full px-3 py-2 border border-gray-800"
-        autoComplete="email"
+        autoComplete="username"
+        required
       />
 
       <input
@@ -92,11 +112,12 @@ const Login = () => {
         placeholder="Password"
         className="w-full px-3 py-2 border border-gray-800"
         autoComplete={mode === "Login" ? "current-password" : "new-password"}
+        required
       />
 
       <button
         disabled={loading}
-        className="w-full px-8 py-2 mt-4 text-white bg-black"
+        className="w-full px-8 py-2 mt-4 text-white bg-black disabled:opacity-60"
       >
         {loading ? "Processing..." : mode}
       </button>
