@@ -8,7 +8,7 @@ const About = () => {
     <div>
       {/* Header */}
       <div className='pt-8 text-2xl text-center border-t'>
-        <Title text1={'ABOUT'} text2={'US'} />
+        <Title text1={'ABOUT'} text2={'RAW SAHARA'} />
       </div>
 
       {/* Main About Section */}
@@ -16,49 +16,67 @@ const About = () => {
         <img
           className='w-full md:max-w-[450px]'
           src={assets.about_img}
-          alt="About Photo"
+          alt="About Raw Sahara Thrifted Winter Wear"
         />
         <div className='flex flex-col justify-center gap-6 text-gray-600 md:w-2/4'>
           <p>
-            Welcome to Sahara, your one-stop online store for premium products across a variety of categories. Our mission is to provide high-quality, stylish, and affordable items that enhance your lifestyle and home.
+            Raw Sahara is a modern Indian thrift-first clothing brand focused on
+            premium winter wear, hoodies, and streetwear for men and women. We
+            curate unique pieces that balance style, comfort, and affordability —
+            because great fashion doesn’t need to be mass-produced.
           </p>
+
           <p>
-            At Sahara, we prioritize your satisfaction. From browsing our curated collections to receiving your order, we ensure a seamless and enjoyable shopping experience. Our team works tirelessly to bring you the latest products and trends, helping you find exactly what you need.
+            Every Raw Sahara piece is carefully selected for quality, fit, and
+            durability. From oversized hoodies to winter essentials, our
+            collections are designed for people who want standout style without
+            compromising on value or sustainability.
           </p>
 
           <b className='text-gray-800'>Our Mission</b>
           <p>
-            To empower customers by providing top-quality products, exceptional service, and a convenient online shopping experience for all needs.
+            To redefine winter fashion in India by making premium thrifted
+            streetwear accessible, stylish, and trustworthy for everyone.
           </p>
 
           <b className='text-gray-800'>Our Vision</b>
           <p>
-            To be a leading e-commerce brand, trusted by customers across India, delivering excellence in product quality, service, and innovation.
+            To build Raw Sahara into a leading thrifted winter wear brand in
+            India — known for authenticity, quality, and a bold streetwear
+            identity.
           </p>
         </div>
       </div>
 
       {/* Why Choose Us Section */}
       <div className='py-4 text-xl'>
-        <Title text1={'WHY'} text2={'CHOOSE US'} />
+        <Title text1={'WHY'} text2={'RAW SAHARA'} />
       </div>
+
       <div className='flex flex-col mb-20 text-sm md:flex-row'>
         <div className='flex flex-col gap-5 px-10 py-8 border md:px-16 sm:py-20'>
-          <b>Quality Assurance</b>
+          <b>Curated Thrifted Quality</b>
           <p className='text-gray-600'>
-            Every product at Sahara is carefully selected to meet our high standards, ensuring you receive the best in quality and design.
+            Each winter wear piece is handpicked and quality-checked, ensuring
+            you receive durable, stylish clothing that lasts beyond a single
+            season.
           </p>
         </div>
+
         <div className='flex flex-col gap-5 px-10 py-8 border md:px-16 sm:py-20'>
-          <b>Convenience</b>
+          <b>Streetwear with Purpose</b>
           <p className='text-gray-600'>
-            Enjoy an effortless shopping experience with easy browsing, secure payments, timely delivery, and simple returns.
+            Raw Sahara blends modern streetwear aesthetics with conscious
+            fashion, offering unique hoodies and winter fits you won’t find
+            everywhere.
           </p>
         </div>
+
         <div className='flex flex-col gap-5 px-10 py-8 border md:px-16 sm:py-20'>
-          <b>Exceptional Customer Service</b>
+          <b>Customer-First Experience</b>
           <p className='text-gray-600'>
-            Our friendly support team is ready to assist you with any questions or concerns, ensuring a smooth and satisfying shopping experience.
+            From browsing to delivery, our support team ensures a smooth and
+            transparent shopping experience every step of the way.
           </p>
         </div>
       </div>

@@ -8,39 +8,55 @@ const Contact = () => {
     <div>
       {/* Header */}
       <div className='pt-10 text-2xl text-center border-t'>
-        <Title text1={'CONTACT'} text2={'US'} />
+        <Title text1={'CONTACT'} text2={'RAW SAHARA'} />
       </div>
 
       {/* Main Contact Section */}
       <div className='flex flex-col justify-center gap-10 my-10 md:flex-row mb-28'>
-        {/* Image */}
         <img
           className='w-full md:max-w-[480px]'
           src={assets.contact_img}
-          alt="Contact Photo"
+          alt="Contact Raw Sahara Support"
         />
 
-        {/* Info */}
         <div className='flex flex-col items-start justify-center gap-6'>
           <p className='text-xl font-semibold text-gray-600'>Our Store</p>
           <p className='text-gray-500'>
-            Sahara Store <br />
+            Raw Sahara <br />
             Hyderabad, India
           </p>
+
           <p className='text-gray-500'>
-            Tel: +91-9347175125 <br />
-            Email: sahara.store.online@gmail.com
+            Phone: +91-9347175125 <br />
+            Email: support@rawsahara.in
           </p>
 
-          <p className='text-xl font-semibold text-gray-600'>Careers at Sahara</p>
+          <p className='text-xl font-semibold text-gray-600'>Work With Us</p>
           <p className='text-gray-500'>
-            Join Sahara! Explore job opportunities and help us bring the best Diwali collections to our customers.
+            Raw Sahara is growing. If you’re passionate about streetwear,
+            thrifting, and modern fashion culture, stay tuned for upcoming
+            opportunities.
           </p>
-          Coming soon...
+
+          <p className='text-xl font-semibold text-gray-600'>Careers & Contributions</p>
+          <p className='text-gray-500'>
+            If you’re passionate about streetwear, thrift culture, or want to support and
+            add value to the Raw Sahara journey, we’d love to hear from you.
+          </p>
+          <p className='text-gray-500'>
+            Reach out to us at{" "}
+            <a
+              href="mailto:support@rawsahara.in"
+              className="text-black underline"
+            >
+              support@rawsahara.in
+            </a>{" "}
+            with your ideas, skills, or collaboration proposals.
+          </p>
+
         </div>
       </div>
 
-      {/* Newsletter Box */}
       <NewsLetterBox />
     </div>
   );
