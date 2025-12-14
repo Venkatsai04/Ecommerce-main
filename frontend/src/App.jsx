@@ -24,6 +24,7 @@ import TryOn from './pages/TryOn'
 import WinterChills from './components/WinterChills'
 import ReturnsPolicy from './pages/ReturnsPolicy'
 import ForgotPassword from './pages/ForgotPassword'
+import Register from './pages/Register'
 
 const App = () => {
 
@@ -55,14 +56,15 @@ const App = () => {
         <Route path='/product/:productId' element={<Product />} />
         <Route path='/cart' element={<Cart />} />
         <Route path='/login' element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path='/place-order' element={<PlaceOrder />} />
         <Route path='/orders' element={<Orders />} />
         <Route path='/privacy-policy' element={<PrivacyPolicy />} />
         <Route path='/Profile' element={<Profile />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/try-on" element={<TryOn />} />
-        <Route path="/returns" element={<ReturnsPolicy/>} />
-        <Route path="/reset-password" element={<ForgotPassword/>} />
+        <Route path="/returns" element={<ReturnsPolicy />} />
+        <Route path="/reset-password" element={<ForgotPassword />} />
 
       </Routes>
       <Footer />
