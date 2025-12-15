@@ -120,17 +120,42 @@ const Orders = () => {
                 </td>
 
                 <td className="px-4 py-3 text-sm whitespace-nowrap">
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      order.status === "Delivered"
-                        ? "bg-green-100 text-green-700"
-                        : order.status === "Pending"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : "bg-gray-100 text-gray-700"
-                    }`}
+                  <select
+                    value={order.status}
+                    onChange={async (e) => {
+                      const newStatus = e.target.value;
+
+                      try {
+                        const token = localStorage.getItem("token");
+
+                        await axios.post(
+                          `${backendUrl}/api/order/update-status`,
+                          {
+                            orderId: order._id,
+                            status: newStatus,
+                          },
+                          {
+                            headers: { token },
+                          }
+                        );
+
+                        toast.success("Order status updated");
+                        fetchOrders();
+                      } catch (error) {
+                        toast.error("Failed to update order status");
+                      }
+                    }}
+                    className="px-2 py-1 text-xs border rounded bg-white"
                   >
-                    {order.status}
-                  </span>
+                    <option value="Ordered">Ordered</option>
+                    <option value="Packed">Packed</option>
+                    <option value="Delivery Partner Assigned">Delivery Partner Assigned</option>
+                    <option value="In Transit">In Transit</option>
+                    <option value="Out for Delivery">Out for Delivery</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+
                 </td>
 
                 <td className="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">

@@ -8,10 +8,10 @@ const Orders = () => {
   const navigate = useNavigate();
 
   const [orders, setOrders] = useState([]);
-
   const [trackingOrder, setTrackingOrder] = useState(null);
   const [isTrackingOpen, setIsTrackingOpen] = useState(false);
 
+  // ✅ KEEP STATUSES SAME
   const steps = [
     "Ordered",
     "Packed",
@@ -39,6 +39,17 @@ const Orders = () => {
   };
 
   const closeTracking = () => setIsTrackingOpen(false);
+
+  // ✅ ACTIVE STEP INDEX
+  const getActiveIndex = (status) => steps.indexOf(status);
+
+  // ✅ GET TIME FOR STEP (from backend statusHistory)
+  const getStepTime = (label) => {
+    const entry = trackingOrder?.statusHistory?.find(
+      (s) => s.status === label
+    );
+    return entry ? new Date(entry.time).toLocaleString() : null;
+  };
 
   return (
     <div className="pt-16 border-t">
@@ -85,10 +96,7 @@ const Orders = () => {
 
                 <div className="flex justify-between md:w-1/2 mt-4 md:mt-0">
                   <div className="flex items-center gap-2">
-                    <div className="relative">
-                      <span className="h-2 w-2 block bg-green-500 rounded-full"></span>
-                      <span className="absolute inset-0 h-2 w-2 bg-green-400 rounded-full animate-ping opacity-60"></span>
-                    </div>
+                    <span className="h-2 w-2 bg-green-500 rounded-full"></span>
                     <p className="text-sm md:text-base">{order.status}</p>
                   </div>
 
@@ -108,59 +116,60 @@ const Orders = () => {
         ))
       )}
 
-      {isTrackingOpen && (
+      {/* ================= TRACKING MODAL ================= */}
+      {isTrackingOpen && trackingOrder && (
         <>
           <div
             onClick={closeTracking}
             className="fixed inset-0 bg-black bg-opacity-40 z-40"
           ></div>
 
-          <div
-            className="
-              fixed left-0 right-0 bottom-0 bg-white 
-              rounded-t-2xl shadow-xl z-50 p-6 
-              h-[55vh] animate-slideUp
-            "
-          >
+          <div className="fixed left-0 right-0 bottom-0 bg-white rounded-t-2xl shadow-xl z-50 p-6 h-[55vh] animate-slideUp">
             <div className="flex justify-between items-center mb-3">
-              <h2 className="text-xl font-semibold text-black">
-                Order Tracking
-              </h2>
-
-              <button onClick={closeTracking}>
-                <span className="text-2xl font-bold">×</span>
+              <h2 className="text-xl font-semibold">Order Tracking</h2>
+              <button onClick={closeTracking} className="text-2xl font-bold">
+                ×
               </button>
             </div>
 
-            <p className="text-gray-600 text-sm">
-              Order ID: {trackingOrder?._id}
+            <p className="text-sm text-gray-500 mb-5">
+              Order ID: {trackingOrder._id}
             </p>
 
-            <div className="mt-6 pl-2 flex gap-6">
+            <div className="pl-2">
               <div className="relative">
-                <div className="absolute top-0 bottom-0 w-[3px] bg-black left-[7px] h-[calc(100%-20px)]"></div>
+                <div className="absolute top-0 bottom-0 w-[3px] bg-black left-[7px]"></div>
 
-                {steps.map((label, index) => (
-                  <div key={index} className="flex items-start gap-4 mb-6">
-                    <div className="relative mt-[2px]">
+                {steps.map((label, index) => {
+                  const activeIndex = getActiveIndex(trackingOrder.status);
 
-                      {/* 🔴 green DOT FOR INDEX 0 */}
-                      <div
-                        className={`w-4 h-4 rounded-full border-2 ${
-                          index === 0
-                            ? "bg-green-600 border-green-600"
-                            : "bg-white border-black"
-                        }`}
-                      ></div>
+                  return (
+                    <div key={label} className="flex items-start gap-4 mb-6">
+                      <div className="relative mt-[2px]">
+                        <div
+                          className={`w-4 h-4 rounded-full border-2 ${
+                            index <= activeIndex
+                              ? "bg-green-600 border-green-600"
+                              : "bg-white border-black"
+                          }`}
+                        ></div>
 
-                      {index === 0 && (
-                        <span className="absolute inset-0 w-4 h-4 bg-red-600 rounded-full animate-ping opacity-70"></span>
-                      )}
+                        {index === activeIndex && (
+                          <span className="absolute inset-0 w-4 h-4 bg-green-500 rounded-full animate-ping opacity-70"></span>
+                        )}
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-medium">{label}</p>
+                        {getStepTime(label) && (
+                          <p className="text-xs text-gray-500">
+                            {getStepTime(label)}
+                          </p>
+                        )}
+                      </div>
                     </div>
-
-                    <p className="text-sm font-medium text-black">{label}</p>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 

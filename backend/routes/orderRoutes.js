@@ -1,7 +1,7 @@
 import express from "express";
 import { verifyToken } from "../middleware/auth.js";
 import adminAuth from "../middleware/adminAuth.js";
-import { placeOrder, getUserOrders, getAllOrders } from "../controllers/orderController.js";
+import { placeOrder, getUserOrders, getAllOrders ,updateOrderStatus} from "../controllers/orderController.js";
 
 const router = express.Router();
 
@@ -11,5 +11,6 @@ router.get("/user", verifyToken, getUserOrders);
 
 // 🔹 Admin route
 router.get("/admin/all", adminAuth, getAllOrders);
+router.post("/update-status", adminAuth, updateOrderStatus);
 
 export default router;

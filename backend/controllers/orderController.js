@@ -116,5 +116,45 @@ export const getAllOrders = async (req, res) => {
 // =======================================================================
 // FINAL EXPORT (corrects your route import error)
 // =======================================================================
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const { orderId, status } = req.body;
+
+    const allowedStatuses = [
+      "Ordered",
+      "Packed",
+      "Delivery Partner Assigned",
+      "In Transit",
+      "Out for Delivery",
+      "Delivered",
+      "Cancelled",
+    ];
+
+    if (!allowedStatuses.includes(status)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid status" });
+    }
+
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+    }
+
+    order.status = status;
+    await order.save();
+
+    res.json({
+      success: true,
+      message: "Order status updated",
+      status: order.status,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 export { };
-export default { placeOrder, getUserOrders, getAllOrders };
+export default { placeOrder, getUserOrders, getAllOrders ,updateOrderStatus};
