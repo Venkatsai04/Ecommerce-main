@@ -14,7 +14,8 @@ import cartRoutes from "./routes/cartRoutes.js";
 import paymentRoutes from "./routes/paymentRoute.js";
 import shippingRoutes from "./routes/shippingRoutes.js";
 import tryOnRoute from "./routes/tryOnRoute.js";
-import analyticsRouter from "./routes/analyticsRoute.js"; // ✅ NEW IMPORT
+import analyticsRouter from "./routes/analyticsRoute.js"; 
+import couponRoutes from "./routes/couponRoutes.js"
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -51,7 +52,9 @@ app.use("/api", cartRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/shipping", shippingRoutes);
 app.use("/api/tryon", tryOnRoute);
-app.use("/api/analytics", analyticsRouter); // ✅ NEW ROUTE
+app.use("/api/analytics", analyticsRouter); 
+app.use("/api/coupon", couponRoutes);
+
 
 app.get("/", (req, res) => {
   res.send("Sahara API running");

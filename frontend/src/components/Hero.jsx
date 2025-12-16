@@ -18,12 +18,12 @@ const DRAG_FACTOR = 0.2;
 const BASE_IMAGES = [
   { src: "/hippo.jpg", label: "Avant Garde" },
   { src: "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=600&auto=format&fit=crop", label: "Neo Tokyo" },
-  { src: "https://images.unsplash.com/photo-1617137968427-85924c809a10?q=80&w=600&auto=format&fit=crop", label: "Structure" },
-  { src: "https://images.unsplash.com/photo-1529139574466-a302d2d3f524?q=80&w=600&auto=format&fit=crop", label: "Ethereal" },
-  { src: "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?q=80&w=600&auto=format&fit=crop", label: "Classic" },
+  { src: "https://images.laguna-live.sd.co.uk/zoom/upload2059474591465647374.jpg?format=jpg&width=658", label: "Structure" },
+  { src: "https://di2ponv0v5otw.cloudfront.net/posts/2021/09/15/61426bf267bd91b07ae69eb6/m_61426bf6c936afed30d1fe3d.jpg", label: "Ethereal" },
+  { src: "https://static.aceomni.cmsaceturtle.com/prod/product-image/aceomni/Lee/Monobrand/LMJK003893/LMJK003893_1.webp", label: "Classic" },
   { src: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=600&auto=format&fit=crop", label: "Portrait" },
-  { src: "https://images.unsplash.com/photo-1581044777550-4cfa60707c03?q=80&w=600&auto=format&fit=crop", label: "Fashion" },
-  { src: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?q=80&w=600&auto=format&fit=crop", label: "Couture" },
+  { src: "/one.png", label: "Fashion" },
+  { src: "https://static.cilory.com/702384-thickbox_default/grunt-denim-blue-washed-trucker-jacket.jpg.webp", label: "Couture" },
 ];
 
 const ITEMS = [...BASE_IMAGES, ...BASE_IMAGES, ...BASE_IMAGES];

@@ -1,6 +1,8 @@
 import Order from "../models/orderModel.js";
 import Product from "../models/productModel.js"; // needed for soldOut update
 import { createShiprocketOrder } from "../utils/shiprocket.js";
+import Coupon from "../models/couponModel.js";
+
 
 // =======================================================================
 // PLACE ORDER (USER)

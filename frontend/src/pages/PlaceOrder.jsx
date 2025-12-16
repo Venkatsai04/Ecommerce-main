@@ -25,6 +25,13 @@ const PlaceOrder = () => {
   const [loading, setLoading] = useState(false);
   const [showCODConfirm, setShowCODConfirm] = useState(false);
 
+  // ⭐ NEW: Coupon states
+  const [couponCode, setCouponCode] = useState("");
+  const [discountAmount, setDiscountAmount] = useState(0);
+  const [couponId, setCouponId] = useState(null);
+  const [couponApplied, setCouponApplied] = useState(false);
+  const [verifyingCoupon, setVerifyingCoupon] = useState(false);
+
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -80,7 +87,7 @@ const PlaceOrder = () => {
   }, [form.zip]);
 
   // ------------------------------------------------------------------
-  // ⭐ CALCULATE SHIPPING FEE + TOTAL
+  // ⭐ CALCULATE CART AMOUNT + SHIPPING FEE
   // ------------------------------------------------------------------
   const cartAmount = getCartAmount();
   let deliveryFee = baseShipping;
@@ -93,7 +100,66 @@ const PlaceOrder = () => {
     deliveryFee = 0; // prepaid free shipping
   }
 
-  const totalAmount = cartAmount + deliveryFee;
+  // ------------------------------------------------------------------
+  // ⭐ NEW: VERIFY COUPON CODE
+  // ------------------------------------------------------------------
+  const verifyCoupon = async () => {
+    if (!couponCode.trim()) {
+      toast.error("Please enter a coupon code");
+      return;
+    }
+
+    if (!token) {
+      toast.error("Please login to apply coupon");
+      return;
+    }
+
+    setVerifyingCoupon(true);
+    try {
+      const res = await axios.post(
+        `${backendUrl}/coupon/apply`,
+        { 
+          code: couponCode,
+          cartAmount: cartAmount 
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (res.data.success) {
+        setDiscountAmount(Number(res.data.discount) || 0);
+        setCouponId(res.data.couponId);
+        setCouponApplied(true);
+        toast.success("Coupon applied successfully!");
+      } else {
+        toast.error(res.data.message || "Invalid coupon code");
+        setDiscountAmount(0);
+        setCouponId(null);
+        setCouponApplied(false);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Invalid coupon code");
+      setDiscountAmount(0);
+      setCouponId(null);
+      setCouponApplied(false);
+    } finally {
+      setVerifyingCoupon(false);
+    }
+  };
+
+  // ⭐ NEW: REMOVE COUPON
+  const removeCoupon = () => {
+    setCouponCode("");
+    setDiscountAmount(0);
+    setCouponId(null);
+    setCouponApplied(false);
+    toast.info("Coupon removed");
+  };
+
+  // ------------------------------------------------------------------
+  // ⭐ CALCULATE TOTAL WITH DISCOUNT
+  // ------------------------------------------------------------------
+  const totalAmount = cartAmount + deliveryFee - discountAmount;
 
   const format = (num) =>
     num.toLocaleString("en-IN", {
@@ -154,6 +220,9 @@ const PlaceOrder = () => {
           paymentMethod: "cod",
           totalAmount,
           deliveryFee,
+          discountAmount, // ⭐ NEW: Include discount
+          couponCode: couponApplied ? couponCode : null, // ⭐ NEW: Include coupon code
+          couponId: couponApplied ? couponId : null, // ⭐ NEW: Include coupon ID
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -216,6 +285,9 @@ const PlaceOrder = () => {
                 address: form,
                 totalAmount,
                 deliveryFee,
+                discountAmount, // ⭐ NEW: Include discount
+                couponCode: couponApplied ? couponCode : null, // ⭐ NEW: Include coupon code
+                couponId: couponApplied ? couponId : null, // ⭐ NEW: Include coupon ID
               },
               { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -331,6 +403,42 @@ const PlaceOrder = () => {
       {/* RIGHT SIDE */}
       <div className="mt-8 w-full sm:max-w-[480px]">
 
+        {/* ⭐ NEW: COUPON CODE SECTION */}
+        <div className="mb-6">
+          <Title text1={"COUPON"} text2={"CODE"} />
+          <div className="flex gap-2 mt-3">
+            <input
+              type="text"
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+              placeholder="Enter coupon code"
+              disabled={couponApplied}
+              className="flex-1 px-4 py-2 border rounded disabled:bg-gray-100"
+            />
+            {!couponApplied ? (
+              <button
+                onClick={verifyCoupon}
+                disabled={verifyingCoupon}
+                className="px-6 py-2 bg-black text-white rounded disabled:bg-gray-400"
+              >
+                {verifyingCoupon ? "Verifying..." : "Apply"}
+              </button>
+            ) : (
+              <button
+                onClick={removeCoupon}
+                className="px-6 py-2 bg-red-500 text-white rounded"
+              >
+                Remove
+              </button>
+            )}
+          </div>
+          {couponApplied && (
+            <p className="text-sm text-green-600 mt-2">
+              ✓ Coupon applied! You saved {currency}{format(discountAmount)}
+            </p>
+          )}
+        </div>
+
         {/* PAYMENT METHODS */}
         <div className="mt-8">
           <Title text1={"PAYMENT"} text2={"METHODS"} />
@@ -368,11 +476,25 @@ const PlaceOrder = () => {
             updateCartItem={updateCartItem}
             removeItem={removeCartItem}
             delivery_fee={deliveryFee}
+            discount={discountAmount}
           />
 
-          <p className="mt-2 text-sm text-gray-700">
-            <strong>Final Payable:</strong> {currency}{format(totalAmount)}
-          </p>
+          {/* ⭐ NEW: Display discount line after CartTotal
+          {discountAmount > 0 && (
+            <>
+              <div className="flex justify-between mt-2">
+                <p>Discount:</p>
+                <p className="text-green-600">- {currency}{format(discountAmount)}</p>
+              </div>
+              <div className="flex text-2xl justify-between mt-2 font-bold border-t pt-2">
+                <p>Total Amount</p>
+                <p>{currency}{format(totalAmount)}</p>
+              </div>
+              <p className="mt-2 text-sm text-gray-600">
+                Final Payable: {currency}{format(totalAmount)}
+              </p>
+            </>
+          )} */}
 
           <div className="w-full mt-6 text-end">
             <button

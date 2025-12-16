@@ -26,6 +26,7 @@ import ReturnsPolicy from './pages/ReturnsPolicy'
 import ForgotPassword from './pages/ForgotPassword'
 import Register from './pages/Register'
 import ResetPassword from './pages/ResetPassword'
+import CouponOverlay from './components/CouponOverlay'
 
 const App = () => {
 
@@ -45,10 +46,11 @@ const App = () => {
     <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
       {/* <DiwaliFirework /> */}
       <WinterChills />
-      <ToastContainer />
+      <ToastContainer /> 
       <NavBar />
       <SearchBar />
       <ScrollToTop />
+      <CouponOverlay />
       <Routes>
         <Route path='/' element={<Home />} />
         <Route path='/collection' element={<Collection />} />

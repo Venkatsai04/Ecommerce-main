@@ -47,6 +47,7 @@ const Sidebar = () => {
           { to: "/add", icon: assets.add_icon, label: "Add Product" },
           { to: "/list", icon: assets.parcel_icon, label: "Product List" },
           { to: "/orders", icon: assets.order_icon, label: "Orders" },
+          { to: "/coupons", icon: assets.order_icon, label: "Coupons" },
         ].map((link, idx) => (
           <NavLink
             key={idx}

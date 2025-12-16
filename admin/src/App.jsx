@@ -12,6 +12,7 @@ import Analytics from "./pages/Analytics"; // ✅ NEW IMPORT
 
 import { ToastContainer, Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Coupons from "./pages/Coupons";
 
 export const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -56,6 +57,8 @@ const App = () => {
                 <Route path="/list" element={<List token={token} />} />
                 <Route path="/orders" element={<Orders token={token} />} />
                 <Route path="/update" element={<Update token={token} />} />
+                <Route path="/coupons" element={<Coupons />} />
+
               </Routes>
             </main>
           </div>
