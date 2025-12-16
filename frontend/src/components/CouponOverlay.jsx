@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 
 const CouponOverlay = () => {
   const [show, setShow] = useState(false);
-  const COUPON_CODE = "FIRST00";
+  const COUPON_CODE = "FIRST100";
 
   useEffect(() => {
     const timer = setTimeout(() => {
