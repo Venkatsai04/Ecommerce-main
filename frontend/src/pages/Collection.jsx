@@ -12,11 +12,14 @@ const Collection = () => {
 
   const [filtered, setFiltered] = useState([]);
 
-  // FILTER STATES
+  // FILTER STATES (ORIGINAL)
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [selectedSizes, setSelectedSizes] = useState([]);
   const [selectedGender, setSelectedGender] = useState([]);
   const [sortType, setSortType] = useState("relevant");
+
+  // ✅ NEW: STOCK FILTER
+  const [stockFilter, setStockFilter] = useState("all"); // all | in | out
 
   const [sortOpen, setSortOpen] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -29,11 +32,13 @@ const Collection = () => {
     const types = params.get("types");
     const sizes = params.get("sizes");
     const sort = params.get("sort");
+    const stock = params.get("stock"); // ✅ NEW
 
     if (gender) setSelectedGender(gender.split(","));
     if (types) setSelectedTypes(types.split(","));
     if (sizes) setSelectedSizes(sizes.split(","));
     if (sort) setSortType(sort);
+    if (stock) setStockFilter(stock); // ✅ NEW
   }, []);
   /* ========================================================= */
 
@@ -45,9 +50,16 @@ const Collection = () => {
     if (selectedTypes.length) params.set("types", selectedTypes.join(","));
     if (selectedSizes.length) params.set("sizes", selectedSizes.join(","));
     if (sortType !== "relevant") params.set("sort", sortType);
+    if (stockFilter !== "all") params.set("stock", stockFilter); // ✅ NEW
 
     navigate({ search: params.toString() }, { replace: true });
-  }, [selectedGender, selectedTypes, selectedSizes, sortType]);
+  }, [
+    selectedGender,
+    selectedTypes,
+    selectedSizes,
+    sortType,
+    stockFilter,
+  ]);
   /* ================================================================== */
 
   const toggle = (value, setter, list) => {
@@ -80,18 +92,22 @@ const Collection = () => {
       );
     }
 
-    // SORTING
+    // ✅ NEW: STOCK FILTER LOGIC
+    if (stockFilter === "in") {
+      copy = copy.filter((item) => !item.soldOut);
+    }
+    if (stockFilter === "out") {
+      copy = copy.filter((item) => item.soldOut);
+    }
+
+    // SORTING (ORIGINAL)
     if (sortType === "latest") {
       copy.sort((a, b) => {
-        // 1️⃣ If createdAt exists, use it
         if (a.createdAt && b.createdAt) {
           return new Date(b.createdAt) - new Date(a.createdAt);
         }
-
-        // 2️⃣ Fallback: MongoDB ObjectId timestamp
         return b._id.localeCompare(a._id);
       });
-
     } else if (sortType === "low-high") {
       copy.sort((a, b) => a.price - b.price);
     } else if (sortType === "high-low") {
@@ -99,7 +115,14 @@ const Collection = () => {
     }
 
     setFiltered(copy);
-  }, [products, selectedGender, selectedTypes, selectedSizes, sortType]);
+  }, [
+    products,
+    selectedGender,
+    selectedTypes,
+    selectedSizes,
+    sortType,
+    stockFilter, // ✅ NEW
+  ]);
   /* ======================================================== */
 
   const clearFilters = () => {
@@ -107,6 +130,7 @@ const Collection = () => {
     setSelectedTypes([]);
     setSelectedSizes([]);
     setSortType("relevant");
+    setStockFilter("all"); // ✅ NEW
     navigate("/collection", { replace: true });
   };
 
@@ -124,7 +148,7 @@ const Collection = () => {
         </button>
       </div>
 
-      {/* SORT */}
+      {/* SORT (UNCHANGED) */}
       <div className="relative">
         <div
           onClick={() => setSortOpen(!sortOpen)}
@@ -134,10 +158,10 @@ const Collection = () => {
             {sortType === "relevant"
               ? "Sort: Relevant"
               : sortType === "latest"
-                ? "Sort: Latest"
-                : sortType === "low-high"
-                  ? "Sort: Low → High"
-                  : "Sort: High → Low"}
+              ? "Sort: Latest"
+              : sortType === "low-high"
+              ? "Sort: Low → High"
+              : "Sort: High → Low"}
           </span>
           <span>▾</span>
         </div>
@@ -176,6 +200,7 @@ const Collection = () => {
               name={item.name}
               price={item.price}
               mrp={item.mrp}
+              soldOut={item.soldOut} // ✅ REQUIRED
             />
           ))
         ) : (
@@ -195,53 +220,78 @@ const Collection = () => {
               <button onClick={() => setFilterOpen(false)}>✕</button>
             </div>
 
-            {/* Gender */}
+            {/* Gender (UNCHANGED) */}
             <p className="font-medium">Gender</p>
             <div className="flex gap-2 mt-2">
               {["Men", "Women"].map((g) => (
                 <button
                   key={g}
                   onClick={() => toggle(g, setSelectedGender, selectedGender)}
-                  className={`px-3 py-1 border rounded ${selectedGender.includes(g)
+                  className={`px-3 py-1 border rounded ${
+                    selectedGender.includes(g)
                       ? "bg-black text-white"
                       : ""
-                    }`}
+                  }`}
                 >
                   {g}
                 </button>
               ))}
             </div>
 
-            {/* Product Type */}
+            {/* Product Type (UNCHANGED) */}
             <p className="font-medium mt-5">Product Type</p>
             <div className="flex flex-wrap gap-2 mt-2">
               {["Hoodie", "Zipper", "Jacket", "Wind Jacket", "Vintage"].map((t) => (
                 <button
                   key={t}
                   onClick={() => toggle(t, setSelectedTypes, selectedTypes)}
-                  className={`px-3 py-1 border rounded ${selectedTypes.includes(t)
+                  className={`px-3 py-1 border rounded ${
+                    selectedTypes.includes(t)
                       ? "bg-black text-white"
                       : ""
-                    }`}
+                  }`}
                 >
                   {t}
                 </button>
               ))}
             </div>
 
-            {/* Sizes */}
+            {/* Sizes (UNCHANGED) */}
             <p className="font-medium mt-5">Sizes</p>
             <div className="flex gap-2 mt-2">
               {["S", "M", "L", "XL", "XXL"].map((s) => (
                 <button
                   key={s}
                   onClick={() => toggle(s, setSelectedSizes, selectedSizes)}
-                  className={`px-3 py-1 border rounded ${selectedSizes.includes(s)
+                  className={`px-3 py-1 border rounded ${
+                    selectedSizes.includes(s)
                       ? "bg-black text-white"
                       : ""
-                    }`}
+                  }`}
                 >
                   {s}
+                </button>
+              ))}
+            </div>
+
+            {/* ✅ NEW: AVAILABILITY */}
+            <p className="font-medium mt-5">Availability</p>
+            <div className="flex gap-2 mt-2">
+              {[
+                { k: "all", t: "All" },
+                { k: "in", t: "In Stock" },
+                { k: "out", t: "Out of Stock" },
+              ].map((o) => (
+                <button
+                  key={o.k}
+                  onClick={() => setStockFilter(o.k)}
+                  className={`px-3 py-1 border rounded ${
+                    stockFilter === o.k
+                      ? "bg-black text-white"
+                      : ""
+                  }`}
+                >
+                  {o.t}
                 </button>
               ))}
             </div>
@@ -264,6 +314,5 @@ const Collection = () => {
     </div>
   );
 };
-
 
 export default Collection;
