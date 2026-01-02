@@ -27,6 +27,10 @@ import ForgotPassword from './pages/ForgotPassword'
 import Register from './pages/Register'
 import ResetPassword from './pages/ResetPassword'
 import CouponOverlay from './components/CouponOverlay'
+import Maintenance from "./pages/Maintenance";
+// import Routes normally when live
+
+const MAINTENANCE_MODE = true;
 
 const App = () => {
 
@@ -40,13 +44,18 @@ const App = () => {
       }
     };
     trackVisit();
+
   }, []);
+
+  if (MAINTENANCE_MODE) {
+    return <Maintenance />;
+  }
 
   return (
     <div className='px-4 sm:px-[5vw] md:px-[7vw] lg:px-[9vw]'>
       {/* <DiwaliFirework /> */}
       <WinterChills />
-      <ToastContainer /> 
+      <ToastContainer />
       <NavBar />
       <SearchBar />
       <ScrollToTop />
