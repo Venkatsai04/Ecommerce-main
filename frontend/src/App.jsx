@@ -30,7 +30,7 @@ import CouponOverlay from './components/CouponOverlay'
 import Maintenance from "./pages/Maintenance";
 // import Routes normally when live
 
-const MAINTENANCE_MODE = true;
+const MAINTENANCE_MODE = false;
 
 const App = () => {
 
