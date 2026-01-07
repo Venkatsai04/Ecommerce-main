@@ -64,7 +64,7 @@ export const checkPincodeAvailability = async (req, res) => {
       "https://apiv2.shiprocket.in/v1/external/courier/serviceability",
       {
         params: {
-          pickup_postcode: "501505", // your warehouse pincode
+          pickup_postcode: "501505", 
           delivery_postcode: pincode,
           weight: 0.5,
           cod: 1,
@@ -73,47 +73,41 @@ export const checkPincodeAvailability = async (req, res) => {
       }
     );
 
-    const couriers = response.data?.data?.available_courier_companies || [];
+    const data = response.data?.data;
+    const couriers = data?.available_courier_companies || [];
 
     if (couriers.length === 0)
       return res.json({ available: false, message: "Delivery not available" });
 
-    // Filter only couriers with valid estimated days
+    // Requirement 4: Get City Name from response
+    const cityName = couriers[0]?.city || "";
+
     const validCouriers = couriers.filter(
       (c) => c.estimated_delivery_days && c.estimated_delivery_days > 0
     );
 
-    if (validCouriers.length === 0)
+    if (validCouriers.length === 0) {
       return res.json({
         available: true,
+        city: cityName,
         delivery_range: "N/A",
         min_charges: couriers[0].rate.toFixed(2),
       });
+    }
 
-    const minDays = Math.min(
-      ...validCouriers.map((c) => c.estimated_delivery_days)
-    );
-    const maxDays = Math.max(
-      ...validCouriers.map((c) => c.estimated_delivery_days)
-    );
-
-    // Find cheapest courier
+    const minDays = Math.min(...validCouriers.map((c) => c.estimated_delivery_days));
+    const maxDays = Math.max(...validCouriers.map((c) => c.estimated_delivery_days));
     const cheapest = couriers.reduce((a, b) => (a.rate < b.rate ? a : b));
 
     res.json({
       available: true,
+      city: cityName, // Sending city name to frontend
       delivery_range: `${minDays}-${maxDays}`,
       min_charges: cheapest.rate.toFixed(2),
     });
   } catch (err) {
-    console.error("❌ Shiprocket Error:", {
-      message: err.response?.data?.message || err.message,
-      status_code: err.response?.status,
-    });
-    res.status(500).json({
-      error: "Failed to check delivery",
-      details: err.response?.data || err.message,
-    });
+    console.error("❌ Shiprocket Error:", err.message);
+    res.status(500).json({ error: "Failed to check delivery" });
   }
 };
 
