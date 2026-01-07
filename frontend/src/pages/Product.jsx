@@ -424,11 +424,11 @@ const Product = () => {
                 }}
                 className="px-8 py-3 text-sm text-white bg-black active:bg-gray-700"
               >
-                ADD TO CART
+                ADD TO BAG
               </button>
             )}
 
-            <button onClick={handleTryOn} className="px-8 py-3 text-sm text-white bg-gradient-to-r from-yellow-600 to-purple-600 hover:opacity-90 shadow-md transition-all">AI TRY ON ✨</button>
+            {/* <button onClick={handleTryOn} className="px-8 py-3 text-sm text-white bg-gradient-to-r from-yellow-600 to-purple-600 hover:opacity-90 shadow-md transition-all">AI TRY ON ✨</button> */}
           </div>
 
           <div className="mt-6 border-t pt-5">
